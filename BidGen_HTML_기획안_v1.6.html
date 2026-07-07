@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BidGen HTML 기획안 v1.6</title>
+<style>
+:root{--navy:#172536;--navy-2:#243447;--blue:#1e5eb8;--blue-soft:#eaf2fc;--violet:#7c3aed;--green:#15803d;--red:#c4362c;--amber:#b76a00;--ink:#17202a;--muted:#66717f;--line:#dce2e8;--surface:#fff;--canvas:#f3f5f7;--sidebar:270px;--shadow:0 12px 40px rgba(23,37,54,.08)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:Pretendard,'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',Arial,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit}
+.shell{min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--navy);color:#d7e0ea;padding:24px 18px 30px;overflow-y:auto;z-index:30}
+.brand{padding:4px 8px 24px;border-bottom:1px solid rgba(255,255,255,.11);margin-bottom:16px}
+.brand-mark{display:flex;align-items:center;gap:10px;font-weight:800;color:#fff;letter-spacing:.02em}
+.brand-mark i{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:linear-gradient(145deg,#2e79d4,#1e5eb8);font-style:normal}
+.brand p{margin:7px 0 0;font-size:11px;color:#8fa0b3}
+.nav-label{margin:18px 9px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#718397;font-weight:700}
+.nav a{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;text-decoration:none;font-size:12px;color:#b9c6d4;margin:2px 0}
+.nav a:hover,.nav a.active{background:rgba(255,255,255,.09);color:#fff}
+.nav a em{font-style:normal;font:600 10px ui-monospace,SFMono-Regular,Consolas,monospace;color:#6fa7e8;width:20px}
+.sidebar-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:18px 7px 0}
+.sidebar-actions button{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);color:#d7e0ea;padding:8px;border-radius:6px;cursor:pointer;font-size:11px}
+.main{margin-left:var(--sidebar)}
+.section{max-width:1420px;margin:0 auto;padding:72px 58px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+.hero{min-height:620px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#fff 0%,#f7f9fb 62%,#e9f1fb 100%);max-width:none;padding-left:max(58px,calc((100vw - var(--sidebar) - 1420px)/2 + 58px));padding-right:max(58px,calc((100vw - var(--sidebar) - 1420px)/2 + 58px))}
+.eyebrow{display:flex;align-items:center;gap:8px;color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.eyebrow:before{content:'';width:28px;height:2px;background:var(--blue)}
+h1{font-size:clamp(38px,5vw,72px);line-height:1.08;letter-spacing:-.055em;margin:18px 0 24px;max-width:980px}
+.hero-lead{font-size:20px;line-height:1.7;color:#475463;max-width:980px;margin:0}
+.hero-tags{display:flex;flex-wrap:wrap;gap:9px;margin-top:30px}
+.hero-tags span{padding:7px 11px;background:#fff;border:1px solid #d7e1ec;border-radius:999px;font-size:12px;font-weight:700;color:#425164;box-shadow:0 3px 12px rgba(23,37,54,.04)}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:44px;max-width:1060px}
+.metric{background:rgba(255,255,255,.82);border:1px solid #dce5ef;border-radius:12px;padding:18px 20px;box-shadow:var(--shadow)}
+.metric b{display:block;font:800 27px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--navy)}
+.metric span{font-size:11px;color:var(--muted)}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:32px}
+.section-head h2{font-size:32px;letter-spacing:-.04em;margin:5px 0 0}
+.section-head p{max-width:500px;margin:0;color:var(--muted);font-size:13px}
+.kicker{font:800 11px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--blue);letter-spacing:.08em}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 5px 20px rgba(23,37,54,.035)}
+.card h3{margin:0 0 10px;font-size:17px;letter-spacing:-.02em}
+.card p{margin:0;color:var(--muted);font-size:13px}
+.card .no{font:800 11px ui-monospace,monospace;color:var(--blue);margin-bottom:15px}
+.problem-card{border-top:3px solid var(--red)}
+.root-card{border-top:3px solid var(--navy)}
+.quote{background:var(--navy);color:#fff;border-radius:14px;padding:30px 34px;font-size:21px;line-height:1.65;font-weight:650;letter-spacing:-.025em;margin-top:18px}
+.quote small{display:block;color:#93a4b5;font-size:12px;font-weight:400;margin-top:14px}
+.pipeline{display:grid;grid-template-columns:1fr 74px 1fr;align-items:stretch;gap:10px}
+.tool-panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tool-head{padding:18px 20px;background:var(--navy-2);color:#fff;display:flex;align-items:center;justify-content:space-between}
+.tool-head b{font-size:17px} .tool-head span{font:700 11px ui-monospace,monospace;color:#9fc7f2}
+.tool-list{padding:12px 20px 20px;margin:0;list-style:none}
+.tool-list li{padding:10px 0;border-bottom:1px solid #edf0f3;font-size:13px;display:flex;gap:10px}
+.tool-list li:last-child{border:0} .tool-list li:before{content:'✓';color:var(--green);font-weight:800}
+.pipe-arrow{display:grid;place-items:center;color:var(--blue);font-size:34px}
+.flow{display:flex;gap:0;overflow-x:auto;padding:8px 2px 18px}
+.flow-step{min-width:148px;position:relative;background:#fff;border:1px solid var(--line);padding:15px 14px;margin-right:23px;border-radius:9px;text-decoration:none}
+.flow-step:after{content:'→';position:absolute;right:-19px;top:50%;transform:translateY(-50%);color:#9aa7b5;font-weight:800}
+.flow-step:last-child:after{display:none}
+.flow-step b{font:800 11px ui-monospace,monospace;color:var(--blue);display:block;margin-bottom:5px}
+.flow-step span{font-size:12px;font-weight:700}
+.flow-step small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.bar-group{display:grid;gap:14px}
+.bar-row{display:grid;grid-template-columns:180px 1fr 110px;align-items:center;gap:12px;font-size:12px}
+.bar-track{height:14px;background:#edf1f5;border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),#5c9be3)}
+.bar-row strong{font:700 12px ui-monospace,monospace;text-align:right}
+.callout{display:flex;gap:14px;align-items:flex-start;border-radius:10px;padding:18px 20px;border:1px solid #e5c98f;background:#fff9ec;color:#745016;margin-top:18px}
+.callout b{display:block;margin-bottom:4px} .callout p{margin:0;font-size:12px}
+.decision-list{display:grid;gap:9px;counter-reset:decision}
+.decision{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 15px;counter-increment:decision}
+.decision:before{content:counter(decision);display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff1df;color:#a95a00;font:800 11px ui-monospace,monospace}
+.decision b{font-size:13px} .decision p{margin:2px 0 0;font-size:11px;color:var(--muted)}
+.decision span{font-size:10px;font-weight:800;color:#a95a00;background:#fff3e5;border-radius:99px;padding:5px 8px}
+.screen-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-btn{border:1px solid var(--line);background:#fff;color:#52606f;padding:7px 11px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700}
+.filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.screen-card{background:#fff;border:1px solid var(--line);border-radius:12px;margin:14px 0;overflow:hidden;box-shadow:0 5px 20px rgba(23,37,54,.035);scroll-margin-top:20px}
+.screen-card[hidden]{display:none}
+.screen-card summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:42px 1fr auto 24px;align-items:center;gap:13px;padding:17px 18px;background:#fbfcfd}
+.screen-card summary::-webkit-details-marker{display:none}
+.screen-index{font:800 11px ui-monospace,monospace;color:var(--blue);width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--blue-soft)}
+.screen-summary-main b{display:block;font-size:14px} .screen-summary-main small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.req-pill{font:700 10px ui-monospace,monospace;background:#eef1f4;color:#465463;padding:5px 8px;border-radius:5px;white-space:nowrap}
+.chevron{font-size:18px;color:#82909e;transition:.2s}
+.screen-card[open] .chevron{transform:rotate(180deg)}
+.screen-body{border-top:1px solid var(--line);padding:18px}
+.screen-facts{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;margin-bottom:16px}
+.screen-facts>div{background:#f7f9fb;border:1px solid #e6eaee;border-radius:8px;padding:11px 13px}
+.screen-facts span{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--blue)}
+.screen-facts p{font-size:11px;color:#566372;margin:4px 0 0}
+.mockup-scroll{overflow-x:auto;padding:12px;background:#e7e4dc;border-radius:9px}
+.mockup-scroll>div{margin:0 auto}
+.va{background:rgba(37,99,235,.12);color:#1746b0;border-radius:3px;padding:0 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.vi{background:rgba(139,58,214,.14);color:#6b21a8;border-radius:3px;padding:0 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.vm{background:rgba(21,128,61,.13);color:#136c34;border-radius:3px;padding:0 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.vx{border:1px dashed #d6928b;color:#b23b30;background:rgba(196,54,44,.05);border-radius:3px;padding:0 4px;font-size:.92em}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+table.spec{border-collapse:collapse;width:100%;min-width:760px;font-size:12px}
+table.spec th{text-align:left;background:#f5f7f9;color:#485666;padding:10px 12px;border-bottom:1px solid var(--line);font-size:11px}
+table.spec td{padding:10px 12px;border-bottom:1px solid #edf0f3;vertical-align:top}
+table.spec tr:last-child td{border-bottom:0}
+.priority{display:inline-block;font:800 9px ui-monospace,monospace;padding:4px 6px;border-radius:4px}
+.must{background:#ffe9e6;color:#a63127} .should{background:#fff3db;color:#986100} .could{background:#e9f4ec;color:#1d6a37}
+.schema-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.schema-card{background:#111d2a;color:#dce7f1;border-radius:11px;padding:19px 20px;overflow:hidden}
+.schema-card h3{margin:0 0 12px;color:#fff;font-size:14px}
+.schema-card code{display:block;font:11px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;color:#9fc7f2;white-space:pre-wrap}
+.blockers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.blocker{display:flex;gap:11px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px}
+.blocker i{font-style:normal;width:25px;height:25px;display:grid;place-items:center;border-radius:6px;background:#ffe9e6;color:var(--red);font-weight:800}
+.blocker b{font-size:12px} .blocker p{margin:2px 0 0;font-size:10.5px;color:var(--muted)}
+.release{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.release-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:17px;position:relative}
+.release-card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue);border-radius:10px 0 0 10px}
+.release-card b{font-size:13px} .release-card p{font-size:11px;color:var(--muted);margin:7px 0 0}
+.footer{padding:40px 58px;background:#101b27;color:#8fa0b3;font-size:11px}
+.footer b{color:#fff}
+.mobile-menu{display:none;position:fixed;right:14px;bottom:14px;z-index:50;border:0;background:var(--navy);color:#fff;width:44px;height:44px;border-radius:50%;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+@media(max-width:1100px){:root{--sidebar:0px}.sidebar{transform:translateX(-100%);width:270px;transition:.2s}body.menu-open .sidebar{transform:none}.main{margin-left:0}.mobile-menu{display:block}.section{padding:54px 24px}.hero{padding:70px 24px;min-height:auto}.metrics{grid-template-columns:repeat(2,1fr)}.grid-3,.pipeline,.schema-grid,.release{grid-template-columns:1fr}.pipe-arrow{transform:rotate(90deg);height:46px}}
+@media(max-width:700px){.grid-2,.screen-facts,.blockers{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.section-head{display:block}.section-head p{margin-top:10px}.screen-card summary{grid-template-columns:36px 1fr 20px}.req-pill{display:none}.bar-row{grid-template-columns:110px 1fr}.bar-row strong{grid-column:2}h1{font-size:40px}.hero-lead{font-size:16px}}
+@media print{.sidebar,.mobile-menu,.screen-toolbar,.sidebar-actions{display:none!important}.main{margin:0}.section{max-width:none;padding:28px 18px;break-inside:auto}.hero{min-height:auto}.screen-card{break-inside:avoid}.mockup-scroll{overflow:visible;zoom:.7}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark"><i>B</i><span>BidGen 기획안</span></div><p>PRD v1.6 · 2026-07-07</p></div>
+  <nav class="nav" id="nav">
+    <div class="nav-label">Overview</div>
+    <a href="#overview"><em>00</em>기획 개요</a>
+    <a href="#problem"><em>01</em>문제·목표</a>
+    <a href="#solution"><em>02</em>서비스 구조</a>
+    <a href="#workflow"><em>03</em>업무 흐름</a>
+    <a href="#scope"><em>04</em>범위·요구사항</a>
+    <div class="nav-label">Screen Design</div>
+    <a href="#screens"><em>05</em>12개 화면 설계</a>
+    <a href="#screen-AS0"><em>A0</em>업로드·매핑</a>
+    <a href="#screen-AS4"><em>A4</em>검증요약</a>
+    <a href="#screen-BS3"><em>B3</em>AI 법령추천</a>
+    <a href="#screen-BS5"><em>B5</em>최종 내보내기</a>
+    <div class="nav-label">Specification</div>
+    <a href="#data"><em>06</em>데이터·규칙</a>
+    <a href="#quality"><em>07</em>테스트·보안</a>
+    <a href="#roadmap"><em>08</em>릴리스·결정사항</a>
+  </nav>
+  <div class="sidebar-actions"><button onclick="toggleAll(true)">화면 펼치기</button><button onclick="toggleAll(false)">화면 접기</button><button onclick="window.print()">인쇄/PDF</button><button onclick="location.hash='#overview'">맨 위로</button></div>
+</aside>
+<main class="main">
+<section class="section hero" id="overview">
+  <div class="eyebrow">Product Planning Document</div>
+  <h1>복사·수정 중심의 계약업무를<br>검증 중심의 단일 흐름으로</h1>
+  <p class="hero-lead"><b>BidGen</b>은 기존 원가계산서 엑셀 업로드부터 표준 검증, 법령 유사사례 비교, AI 보완 추천, 입찰공고문 내보내기까지 연결하는 스탠드얼론 계약업무 자동화 도구입니다.</p>
+  <div class="hero-tags"><span>도구 A · 원가설계 표준검증</span><span>도구 B · 입찰공고문 자동작성</span><span>Human-in-the-loop</span><span>감사 추적성</span><span>Phase 1 HTML 파일럿</span></div>
+  <div class="metrics"><div class="metric"><b>11,100h</b><span>연간 예상 절감시간</span></div><div class="metric"><b>12</b><span>MVP 상세 화면</span></div><div class="metric"><b>14</b><span>A-M0 포함 Must 기능</span></div><div class="metric"><b>0건</b><span>파일럿 핵심 오류 목표</span></div></div>
+</section>
+
+<section class="section" id="problem">
+  <div class="section-head"><div><div class="kicker">01 · PROBLEM & GOAL</div><h2>사람의 실수가 아니라 구조의 문제</h2></div><p>업무 지식이 개인에게 머물고, 기존 파일 복사가 사실상의 표준이 되며, 검토가 최종금액을 훑어보는 수준으로 형식화된 것이 반복 오류의 원인입니다.</p></div>
+  <div class="grid-3">
+    <article class="card problem-card"><div class="no">PROBLEM 01</div><h3>입찰공고문 날짜·조건 오류</h3><p>문서 여러 곳에 흩어진 날짜를 일부만 수정하여 공고 취소·재공고와 일정 지연이 발생합니다.</p></article>
+    <article class="card problem-card"><div class="no">PROBLEM 02</div><h3>원가계산 수식·제비율 오류</h3><p>전임자 엑셀의 행·열을 수정하며 셀 참조가 깨지고, 반기별 제비율 개정을 놓쳐 예산·감사 리스크로 이어집니다.</p></article>
+    <article class="card problem-card"><div class="no">PROBLEM 03</div><h3>견적서 전사·부가세 오류</h3><p>이미지·PDF 견적서를 눈으로 옮겨 적는 과정에서 금액 오기입과 부가세 이중 반영이 발생합니다.</p></article>
+  </div>
+  <div class="grid-2" style="margin-top:18px">
+    <article class="card root-card"><div class="no">ROOT CAUSE</div><h3>지식의 개인화 + 복사·수정 관행</h3><p>최신 기준과 판단 근거를 시스템이 보유하지 않아 담당자 교체나 기준 개정 때 정보가 낡거나 유실됩니다.</p></article>
+    <article class="card root-card"><div class="no">DESIGN PRINCIPLE</div><h3>자동 검증, 사람의 최종 판단</h3><p>반복 대조·계산·최신화는 자동화하되 법령 적용과 예외승인은 담당자가 근거를 확인하고 확정합니다.</p></article>
+  </div>
+  <div class="quote">“한 번 입력한 데이터가 원가검증과 공고문 작성까지 이어지고, 시스템이 누락과 불일치를 먼저 찾아내는 업무 흐름”<small>MVP 한 문장 정의를 화면·데이터·승인 흐름으로 재구성</small></div>
+</section>
+
+<section class="section" id="solution">
+  <div class="section-head"><div><div class="kicker">02 · SERVICE ARCHITECTURE</div><h2>두 도구가 하나의 파이프라인으로 연결</h2></div><p>도구 A의 ‘통과’ 데이터만 도구 B로 전달됩니다. 자동 처리값, AI 추천값, 직접 입력값은 끝까지 출처를 구분합니다.</p></div>
+  <div class="pipeline">
+    <article class="tool-panel"><div class="tool-head"><b>도구 A · 원가설계서 표준검증</b><span>A-M0~A-M7</span></div><ul class="tool-list"><li>기존 원가계산서 엑셀 업로드·표준 매핑</li><li>견적서 금액·부가세·제비율·합계 검증</li><li>규칙 기반 법령 + 조달청 유사사례 비교</li><li>근거 로그와 기준정보 버전 스탬프</li><li>통과 JSON·엑셀 생성</li></ul></article>
+    <div class="pipe-arrow">→</div>
+    <article class="tool-panel"><div class="tool-head"><b>도구 B · 입찰공고문 자동작성</b><span>B-M1~B-M6</span></div><ul class="tool-list"><li>통과본 기반 표준 공고문 자동 초안</li><li>날짜·기한 단일 입력과 논리 검증</li><li>AI 법령 누락·보완 추천과 사람 검토</li><li>추천 채택·수정·기각 이력 기록</li><li>차단조건 확인 후 Excel·PDF·HWP 출력</li></ul></article>
+  </div>
+  <div class="section-head" style="margin-top:42px;margin-bottom:18px"><div><div class="kicker">EXPECTED IMPACT</div><h2 style="font-size:24px">예상 시간 절감</h2></div></div>
+  <div class="card"><div class="bar-group"><div class="bar-row"><span>도구 A 현재</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><strong>2,400h/월</strong></div><div class="bar-row"><span>도구 A 개선 후</span><div class="bar-track"><div class="bar-fill" style="width:66.7%"></div></div><strong>1,600h/월</strong></div><div class="bar-row"><span>도구 B 현재</span><div class="bar-track"><div class="bar-fill" style="width:10.4%"></div></div><strong>250h/월</strong></div><div class="bar-row"><span>도구 B 개선 후</span><div class="bar-track"><div class="bar-fill" style="width:5.2%"></div></div><strong>125h/월</strong></div></div></div>
+</section>
+
+<section class="section" id="workflow">
+  <div class="section-head"><div><div class="kicker">03 · END-TO-END FLOW</div><h2>업로드에서 최종 산출물까지 12단계</h2></div><p>단계 카드를 선택하면 해당 상세 화면으로 이동합니다. 오류 발생 시 다음 단계로 넘기지 않고 원인 위치에서 보완합니다.</p></div>
+  <div class="flow">
+    <a class="flow-step" href="#screen-AS0"><b>01</b><span>엑셀 업로드</span><small>파일 스캔·해시</small></a><a class="flow-step" href="#screen-AS0"><b>02</b><span>자동·수동 매핑</span><small>표준 스키마</small></a><a class="flow-step" href="#screen-AS2"><b>03</b><span>원가 재계산</span><small>고정 로직</small></a><a class="flow-step" href="#screen-AS3"><b>04</b><span>견적 대조</span><small>부가세·이상치</small></a><a class="flow-step" href="#screen-AS4"><b>05</b><span>법령 검증</span><small>규칙+유사사례</small></a><a class="flow-step" href="#screen-AS6"><b>06</b><span>통과 확정</span><small>로그·버전</small></a><a class="flow-step" href="#screen-BS1"><b>07</b><span>A→B 전달</span><small>JSON/세션</small></a><a class="flow-step" href="#screen-BS2"><b>08</b><span>날짜 입력</span><small>다중 반영</small></a><a class="flow-step" href="#screen-BS3"><b>09</b><span>AI 추천</span><small>근거·출처</small></a><a class="flow-step" href="#screen-BS3"><b>10</b><span>사람 검토</span><small>채택·수정·기각</small></a><a class="flow-step" href="#screen-BS4"><b>11</b><span>문서 미리보기</span><small>값 출처 구분</small></a><a class="flow-step" href="#screen-BS5"><b>12</b><span>최종 출력</span><small>Excel/PDF/HWP</small></a>
+  </div>
+  <div class="callout"><div style="font-size:22px">⚑</div><div><b>실패 처리 원칙</b><p>조달청 API 또는 AI API 실패는 규칙 기반 결과를 없애지 않습니다. ‘비교 미수행’ 또는 ‘추천 실패’ 상태를 기록하고 재시도·수동 검토 경로를 제공합니다.</p></div></div>
+</section>
+
+<section class="section" id="scope">
+  <div class="section-head"><div><div class="kicker">04 · MVP SCOPE</div><h2>기능 우선순위와 성공 기준</h2></div><p>Phase 1은 스탠드얼론 HTML 파일럿입니다. 나라장터 자동 등록, 사내 기간계 연동, 일반 공사유형 확장은 제외합니다.</p></div>
+  <div class="table-wrap"><table class="spec"><thead><tr><th>도구</th><th>우선순위</th><th>기능 범위</th><th>핵심 합격 기준</th></tr></thead><tbody>
+  <tr><td><b>도구 A</b></td><td><span class="priority must">MUST</span></td><td>A-M0~A-M7 · 업로드/매핑, 표준 계산, 제비율, 견적 대조, 합계, 법령, 로그, 기준정보</td><td>골든 데이터 계산값 100% 일치, 의도 오류 100% 탐지</td></tr>
+  <tr><td><b>도구 B</b></td><td><span class="priority must">MUST</span></td><td>B-M1~B-M6 · 통과본 연계, 일정, AI 추천, 문서 출력, 추천 이력, 차단조건</td><td>날짜 오류 100% 차단, AI 판단 이력 100% 기록</td></tr>
+  <tr><td><b>확장</b></td><td><span class="priority should">SHOULD</span></td><td>공개데이터 갱신, 결재자 요약, 로컬 저장, OCR, 체크리스트·근거 링크</td><td>파일럿 피드백에 따라 4차 릴리스 반영</td></tr>
+  <tr><td><b>후속</b></td><td><span class="priority could">COULD</span></td><td>자유 항목, 단가 이상치, 비교견적, 템플릿 다종, 추천 통계</td><td>Phase 2 사업성·운영성 검토 후 결정</td></tr>
+  </tbody></table></div>
+  <div class="grid-3" style="margin-top:18px"><article class="card"><div class="no">SUCCESS 01</div><h3>오류 예방</h3><p>도구 사용 건에서 셀참조·제비율·부가세·날짜 오류 0건.</p></article><article class="card"><div class="no">SUCCESS 02</div><h3>시간 절감</h3><p>도구 A 건당 2시간, 도구 B 건당 15분 단축 실측.</p></article><article class="card"><div class="no">SUCCESS 03</div><h3>재현성과 보안</h3><p>기준정보·AI 이력 보존, API 키 비노출, 외부전송 데이터 마스킹.</p></article></div>
+</section>
+
+<section class="section" id="screens">
+  <div class="section-head"><div><div class="kicker">05 · SCREEN SPECIFICATION</div><h2>도구 A 7화면 + 도구 B 5화면</h2></div><div class="screen-toolbar"><button class="filter-btn active" data-filter="all">전체</button><button class="filter-btn" data-filter="A">도구 A</button><button class="filter-btn" data-filter="B">도구 B</button><button class="filter-btn" onclick="toggleAll(true)">모두 펼침</button><button class="filter-btn" onclick="toggleAll(false)">모두 접음</button></div></div>
+  <div class="callout" style="background:#eef5ff;border-color:#b8d3f2;color:#365879;margin-bottom:18px"><div style="font-size:20px">●</div><div><b>값 출처 표시 체계</b><p><span class="va">자동채움</span> · <span class="vi">AI 추천</span> · <span class="vm">직접입력</span> · <span class="vx">미입력</span>을 모든 검토·미리보기 화면에서 동일하게 사용합니다.</p></div></div>
+  
+    <details class="screen-card" id="screen-AS0" data-tool="A" open>
+      <summary>
+        <span class="screen-index">01</span>
+        <span class="screen-summary-main"><b>AS0 · 원가계산서 업로드·매핑</b><small>기존 원가계산서 엑셀을 읽어 표준 스키마로 변환하고, 자동 매핑이 어려운 항목만 사용자가 보정합니다.</small></span>
+        <span class="req-pill">A-M0</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>원가계산서 .xlsx, 시트·헤더 구조</p></div>
+          <div><span>출력</span><p>파일 해시, 매핑 결과, 미매핑 필드 목록</p></div>
+          <div><span>핵심 규칙</span><p>지원 형식 검사 · 매핑 실패 항목 수동 지정 · 지정 이력 기록</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#243447;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 A</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#8a97a8">신규 검증 세션</span></div>
+<div style="display:flex;background:#dfe4ea;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 13px;background:#fff;color:#1e5eb8;border-top:2px solid #1e5eb8;margin-top:-1px">0 업로드·매핑</span>
+<span style="padding:8px 13px;color:#a0a8b3">1 유형</span><span style="padding:8px 13px;color:#a0a8b3">2 원가입력</span><span style="padding:8px 13px;color:#a0a8b3">3 견적대조</span><span style="padding:8px 13px;color:#a0a8b3">4 검증요약</span><span style="padding:8px 13px;color:#a0a8b3">5 근거로그</span><span style="padding:8px 13px;color:#a0a8b3">6 확정</span>
+</div>
+<div style="padding:18px 20px;background:#fff">
+<div style="display:flex;gap:14px;align-items:center;border:1.5px solid #b7d0ef;background:#f3f8fe;border-radius:6px;padding:14px 16px;margin-bottom:16px">
+<div style="width:40px;height:48px;border-radius:4px;background:#1e7a45;display:flex;align-items:center;justify-content:center;color:#fff;font:700 11px 'IBM Plex Sans KR'">XLSX</div>
+<div style="flex:1"><div style="font:600 13px 'IBM Plex Sans KR';color:#1a2430">원가계산서_본관배관교체_v3.xlsx</div><div style="font:500 10.5px 'IBM Plex Mono';color:#7a8494;margin-top:3px">142 KB · SHA-256 3f9a…c1e2 · 업로드 2026-07-07 14:22:03 · 시트 3개</div></div>
+<span style="font:600 11px 'IBM Plex Sans KR';color:#1e7a45;background:#e3f4ea;padding:6px 11px;border-radius:4px">스캔 완료</span>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430">표준 스키마 자동 매핑</div><div style="font:500 11px 'IBM Plex Sans KR';color:#7a8494">자동 <b style="color:#1e7a45;font-family:'IBM Plex Mono'">18</b> / 21 · 수동 필요 <b style="color:#c4362c;font-family:'IBM Plex Mono'">3</b></div></div>
+<table style="width:100%;border-collapse:collapse;font:400 11.5px 'IBM Plex Sans KR';color:#28313d">
+<thead><tr style="background:#f5f7f9;color:#5a6472;font-weight:600;text-align:left"><th style="padding:7px 10px;border:1px solid #e6eaef;width:150px">표준 항목</th><th style="padding:7px 10px;border:1px solid #e6eaef;width:180px">원본 열 / 헤더</th><th style="padding:7px 10px;border:1px solid #e6eaef">값 예시</th><th style="padding:7px 10px;border:1px solid #e6eaef;width:150px">상태</th></tr></thead>
+<tbody>
+<tr><td style="padding:6px 10px;border:1px solid #e6eaef;font-weight:600">project_name</td><td style="padding:6px 10px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">"공 사 명" · B2</td><td style="padding:6px 10px;border:1px solid #e6eaef">본관 노후 상수도 배관…</td><td style="padding:6px 10px;border:1px solid #e6eaef;color:#1e7a45">● 자동 매핑</td></tr>
+<tr><td style="padding:6px 10px;border:1px solid #e6eaef;font-weight:600">item_name</td><td style="padding:6px 10px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">"공종" · A5:A24</td><td style="padding:6px 10px;border:1px solid #e6eaef">배관공사, 밸브설치…</td><td style="padding:6px 10px;border:1px solid #e6eaef;color:#1e7a45">● 자동 매핑</td></tr>
+<tr><td style="padding:6px 10px;border:1px solid #e6eaef;font-weight:600">quantity / unit</td><td style="padding:6px 10px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">"수량" D · "단위" E</td><td style="padding:6px 10px;border:1px solid #e6eaef">120 / m</td><td style="padding:6px 10px;border:1px solid #e6eaef;color:#1e7a45">● 자동 매핑</td></tr>
+<tr style="background:#fdf7ec"><td style="padding:6px 10px;border:1px solid #e6eaef;font-weight:600">unit_price</td><td style="padding:6px 10px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">"재료비단가" F · "노무비" G?</td><td style="padding:6px 10px;border:1px solid #e6eaef">38,500</td><td style="padding:6px 10px;border:1px solid #e6eaef"><span style="color:#d97706">▲ 수동 확인</span> <span style="font-size:10px;color:#7a8494">열 분리 감지</span></td></tr>
+<tr style="background:#fdf1f0"><td style="padding:6px 10px;border:1px solid #e6eaef;font-weight:600">rate_code (제비율)</td><td style="padding:6px 10px;border:1px solid #e6eaef;color:#b23b30">미검출</td><td style="padding:6px 10px;border:1px solid #e6eaef">—</td><td style="padding:6px 10px;border:1px solid #e6eaef"><span style="border:1px solid #c7cdd6;border-radius:4px;padding:3px 8px;background:#fff;font-size:11px;color:#5a6472">열 선택 ▾</span></td></tr>
+<tr style="background:#fdf1f0"><td style="padding:6px 10px;border:1px solid #e6eaef;font-weight:600">vat_type</td><td style="padding:6px 10px;border:1px solid #e6eaef;color:#b23b30">미검출</td><td style="padding:6px 10px;border:1px solid #e6eaef">—</td><td style="padding:6px 10px;border:1px solid #e6eaef"><span style="border:1px solid #c7cdd6;border-radius:4px;padding:3px 8px;background:#fff;font-size:11px;color:#5a6472">포함 / 별도 ▾</span></td></tr>
+</tbody>
+</table>
+<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><span style="font:600 12px 'IBM Plex Sans KR';color:#7a8494;border:1px solid #c7cdd6;background:#f5f7f9;padding:8px 15px;border-radius:5px">수동 매핑 후 진행</span><span style="font:600 12px 'IBM Plex Sans KR';color:#fff;background:#1e5eb8;padding:8px 17px;border-radius:5px">유형 선택 →</span></div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-AS1" data-tool="A" open>
+      <summary>
+        <span class="screen-index">02</span>
+        <span class="screen-summary-main"><b>AS1 · 유형 선택</b><small>업무 유형을 구매 또는 공사(유지보수)로 확정하고 해당 표준 항목·검증 규칙을 불러옵니다.</small></span>
+        <span class="req-pill">A-M1</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>자동 인식 결과, 사용자 유형 선택</p></div>
+          <div><span>출력</span><p>프로젝트 유형, 표준 항목 세트</p></div>
+          <div><span>핵심 규칙</span><p>자동 인식 결과를 사용자가 재확인 · 유형별 기준정보 버전 표시</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#243447;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 A</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#8a97a8">2026-0147</span></div>
+<div style="display:flex;background:#dfe4ea;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 13px;color:#5a6472">0 업로드·매핑</span><span style="padding:8px 13px;background:#fff;color:#1e5eb8;border-top:2px solid #1e5eb8;margin-top:-1px">1 유형</span><span style="padding:8px 13px;color:#a0a8b3">2 원가입력</span><span style="padding:8px 13px;color:#a0a8b3">3 견적대조</span><span style="padding:8px 13px;color:#a0a8b3">4 검증요약</span><span style="padding:8px 13px;color:#a0a8b3">5 근거로그</span><span style="padding:8px 13px;color:#a0a8b3">6 확정</span>
+</div>
+<div style="padding:22px 20px;background:#fff">
+<div style="font:500 11.5px 'IBM Plex Sans KR';color:#7a8494;margin-bottom:14px">업로드 파일에서 자동 인식: <span style="color:#1e5eb8;font-weight:600">공사 (유지보수)</span> · 확인 후 진행하세요</div>
+<div style="display:flex;gap:14px;margin-bottom:20px">
+<div style="flex:1;border:1px solid #d3d9e0;border-radius:6px;padding:18px;background:#fff"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="width:14px;height:14px;border-radius:50%;border:2px solid #c7cdd6"></span><span style="font:700 14px 'IBM Plex Sans KR';color:#4a5462">구매</span></div><div style="font:400 11.5px/1.5 'IBM Plex Sans KR';color:#7a8494;padding-left:22px">물품 구매 표준 원가 항목 리스트 · 계약건수 많음</div></div>
+<div style="flex:1;border:2px solid #1e5eb8;border-radius:6px;padding:18px;background:#f3f8fe"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="width:14px;height:14px;border-radius:50%;border:4px solid #1e5eb8;background:#fff"></span><span style="font:700 14px 'IBM Plex Sans KR';color:#1a2430">공사 (유지보수)</span><span style="margin-left:auto;font:600 10px 'IBM Plex Sans KR';color:#1e5eb8;background:#dbe9fb;padding:3px 8px;border-radius:10px">자동 인식</span></div><div style="font:400 11.5px/1.5 'IBM Plex Sans KR';color:#5a6472;padding-left:22px">유지보수 공사 표준 원가 항목 리스트 (일위대가 기반)</div></div>
+</div>
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:10px">로드된 표준 항목 <span style="color:#7a8494;font-weight:500">12개 · 표준항목 리스트 v2026-04 (계약부서 승인)</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:7px">
+<span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">가설공사</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">배관공사</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">밸브·부속 설치</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">보온공사</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">도장공사</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">폐기물처리</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">직접노무비</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">산재보험료</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">안전관리비</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">일반관리비</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">기업이윤</span><span style="font:500 11.5px 'IBM Plex Sans KR';background:#eef1f4;border:1px solid #d3d9e0;color:#4a5462;padding:5px 11px;border-radius:4px">부가가치세</span>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-AS2" data-tool="A" open>
+      <summary>
+        <span class="screen-index">03</span>
+        <span class="screen-summary-main"><b>AS2 · 원가설계서 입력</b><small>매핑된 원가 항목을 고정 스키마로 편집하고 수량·단가·제비율·합계를 실시간 재계산합니다.</small></span>
+        <span class="req-pill">A-M1 · A-M2 · A-M4</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>표준 항목, 수량, 단가, 적용 기준일</p></div>
+          <div><span>출력</span><p>항목별 금액, 소계, 부가세, 총계</p></div>
+          <div><span>핵심 규칙</span><p>셀 참조 대신 JS 계산 · 최신 제비율 비교 · 차액 즉시 표시</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#243447;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 A</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#8a97a8">고정 계산 로직 · 셀참조 없음</span></div>
+<div style="display:flex;background:#dfe4ea;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 13px;color:#5a6472">0 업로드·매핑</span><span style="padding:8px 13px;color:#5a6472">1 유형</span><span style="padding:8px 13px;background:#fff;color:#1e5eb8;border-top:2px solid #1e5eb8;margin-top:-1px">2 원가입력</span><span style="padding:8px 13px;color:#a0a8b3">3 견적대조</span><span style="padding:8px 13px;color:#a0a8b3">4 검증요약</span><span style="padding:8px 13px;color:#a0a8b3">5 근거로그</span><span style="padding:8px 13px;color:#a0a8b3">6 확정</span>
+</div>
+<div style="display:flex">
+<div style="flex:1;background:#fff;padding:16px 18px">
+<table style="width:100%;border-collapse:collapse;font:400 11px 'IBM Plex Sans KR';color:#28313d">
+<thead><tr style="background:#f5f7f9;color:#5a6472;font-weight:600;text-align:left"><th style="padding:6px 8px;border:1px solid #e6eaef">코드</th><th style="padding:6px 8px;border:1px solid #e6eaef">표준항목 / 규격</th><th style="padding:6px 8px;border:1px solid #e6eaef;text-align:right">수량</th><th style="padding:6px 8px;border:1px solid #e6eaef">단위</th><th style="padding:6px 8px;border:1px solid #e6eaef;text-align:right">단가</th><th style="padding:6px 8px;border:1px solid #e6eaef;text-align:right">금액</th></tr></thead>
+<tbody style="font-family:'IBM Plex Mono';font-size:11px">
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef">101</td><td style="padding:5px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">강관 배관 100A / KS D 3507</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">120</span></td><td style="padding:5px 8px;border:1px solid #e6eaef">m</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">38,500</span></td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="va">4,620,000</span></td></tr>
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef">102</td><td style="padding:5px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">강관 배관 80A / KS D 3507</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">80</span></td><td style="padding:5px 8px;border:1px solid #e6eaef">m</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">29,800</span></td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="va">2,384,000</span></td></tr>
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef">201</td><td style="padding:5px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">게이트밸브 100A</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">6</span></td><td style="padding:5px 8px;border:1px solid #e6eaef">개</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">145,000</span></td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="va">870,000</span></td></tr>
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef">301</td><td style="padding:5px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">보온공사 / 그라스울 50T</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">200</span></td><td style="padding:5px 8px;border:1px solid #e6eaef">m</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="vm">12,400</span></td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="va">2,480,000</span></td></tr>
+<tr style="background:#f5f7f9;font-weight:700"><td colspan="5" style="padding:6px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">직접공사비 소계</td><td style="padding:6px 8px;border:1px solid #e6eaef;text-align:right">10,354,000</td></tr>
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef">401</td><td style="padding:5px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">간접노무비 <span style="color:#7a8494">(제비율 12.4%)</span></td><td colspan="3" style="border:1px solid #e6eaef"></td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:center;color:#1746b0;font-family:'IBM Plex Sans KR';font-size:10px">자동</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="va">1,283,900</span></td></tr>
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef">402</td><td style="padding:5px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">산재보험료 <span style="color:#7a8494">(3.7%)</span></td><td colspan="3" style="border:1px solid #e6eaef"></td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:center;color:#1746b0;font-family:'IBM Plex Sans KR';font-size:10px">자동</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="va">430,600</span></td></tr>
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef">403</td><td style="padding:5px 8px;border:1px solid #e6eaef;font-family:'IBM Plex Sans KR'">일반관리비 <span style="color:#7a8494">(6.0%)</span> · 이윤 <span style="color:#7a8494">(10.0%)</span></td><td colspan="3" style="border:1px solid #e6eaef"></td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:center;color:#1746b0;font-family:'IBM Plex Sans KR';font-size:10px">자동</td><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:right"><span class="va">1,984,700</span></td></tr>
+</tbody>
+</table>
+</div>
+<div style="width:250px;flex:none;background:#f2f5f8;padding:16px 16px;border-left:1px solid #d3d9e0">
+<div style="font:600 11px 'IBM Plex Sans KR';color:#5a6472;margin-bottom:12px;letter-spacing:.03em">실시간 합계</div>
+<table style="width:100%;border-collapse:collapse;font:500 11.5px 'IBM Plex Sans KR';color:#28313d">
+<tbody>
+<tr><td style="padding:5px 0">직접공사비</td><td style="text-align:right;font-family:'IBM Plex Mono'">10,354,000</td></tr>
+<tr><td style="padding:5px 0">제경비 (자동)</td><td style="text-align:right;font-family:'IBM Plex Mono';color:#1746b0">3,699,200</td></tr>
+<tr style="border-top:1px solid #d3d9e0"><td style="padding:6px 0;font-weight:700">공급가액</td><td style="text-align:right;font-family:'IBM Plex Mono';font-weight:700">14,053,200</td></tr>
+<tr><td style="padding:5px 0">부가세 10%</td><td style="text-align:right;font-family:'IBM Plex Mono'">1,405,320</td></tr>
+<tr style="border-top:1.5px solid #243447"><td style="padding:7px 0;font-weight:700;color:#1a2430">합계</td><td style="text-align:right;font-family:'IBM Plex Mono';font-weight:700;color:#1e5eb8">15,458,520</td></tr>
+</tbody>
+</table>
+<div style="margin-top:14px;background:#e3f4ea;border:1px solid #b3ddc4;border-radius:4px;padding:8px 10px;font:500 11px/1.4 'IBM Plex Sans KR';color:#1e7a45">● 소계·총계 = 항목합, 차이 0원</div>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-AS3" data-tool="A" open>
+      <summary>
+        <span class="screen-index">04</span>
+        <span class="screen-summary-main"><b>AS3 · 견적서 대조 입력</b><small>견적서 이미지/PDF와 원가계산 항목을 나란히 대조하고 부가세 포함 여부 및 금액 이상치를 확인합니다.</small></span>
+        <span class="req-pill">A-M3</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>견적서 이미지/PDF, 매핑된 원가 항목</p></div>
+          <div><span>출력</span><p>항목별 대조 상태, 부가세 판단</p></div>
+          <div><span>핵심 규칙</span><p>부가세 포함/별도 선택 필수 · 불일치 인라인 경고 · 미선택 시 진행 차단</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#243447;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 A</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#8a97a8">견적서_동양배관.pdf</span></div>
+<div style="display:flex;background:#dfe4ea;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 13px;color:#5a6472">0 업로드·매핑</span><span style="padding:8px 13px;color:#5a6472">1 유형</span><span style="padding:8px 13px;color:#5a6472">2 원가입력</span><span style="padding:8px 13px;background:#fff;color:#1e5eb8;border-top:2px solid #1e5eb8;margin-top:-1px">3 견적대조</span><span style="padding:8px 13px;color:#a0a8b3">4 검증요약</span><span style="padding:8px 13px;color:#a0a8b3">5 근거로그</span><span style="padding:8px 13px;color:#a0a8b3">6 확정</span>
+</div>
+<div style="display:flex">
+<div style="width:440px;flex:none;background:#40484f;padding:14px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:center;font:500 11px 'IBM Plex Mono';color:#c7cdd6"><span>견적서_동양배관.pdf</span><span>1 / 2</span></div>
+<div style="flex:1;height:360px;border-radius:3px;background:repeating-linear-gradient(45deg,#f4f5f6,#f4f5f6 11px,#e9ebee 11px,#e9ebee 22px);display:flex;align-items:center;justify-content:center"><span style="font:500 11px 'IBM Plex Mono';color:#8a97a8;background:#fff;padding:8px 14px;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.15)">PDF · 이미지 뷰어 영역</span></div>
+</div>
+<div style="flex:1;background:#fff;padding:18px 20px">
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:12px">금액 대조 · 부가세 처리 (필수)</div>
+<div style="border:1px solid #d3d9e0;border-radius:6px;padding:14px;margin-bottom:14px">
+<div style="font:500 11px 'IBM Plex Sans KR';color:#7a8494;margin-bottom:8px">부가세 처리 방식 <span style="color:#c4362c">*필수 선택</span></div>
+<div style="display:flex;gap:8px"><span style="flex:1;text-align:center;font:600 12px 'IBM Plex Sans KR';border:1px solid #c7cdd6;border-radius:5px;padding:8px;color:#7a8494;background:#f5f7f9">부가세 포함</span><span style="flex:1;text-align:center;font:600 12px 'IBM Plex Sans KR';border:2px solid #1e5eb8;border-radius:5px;padding:7px;color:#1a2430;background:#f3f8fe">부가세 별도 ●</span></div>
+</div>
+<table style="width:100%;border-collapse:collapse;font:400 11.5px 'IBM Plex Sans KR';color:#28313d;margin-bottom:14px">
+<thead><tr style="background:#f5f7f9;color:#5a6472;font-weight:600;text-align:right"><th style="padding:6px 8px;border:1px solid #e6eaef;text-align:left">항목</th><th style="padding:6px 8px;border:1px solid #e6eaef">원가서 금액</th><th style="padding:6px 8px;border:1px solid #e6eaef">견적 금액</th></tr></thead>
+<tbody style="font-family:'IBM Plex Mono';text-align:right">
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:left;font-family:'IBM Plex Sans KR'">강관 100A</td><td style="padding:5px 8px;border:1px solid #e6eaef">4,620,000</td><td style="padding:5px 8px;border:1px solid #e6eaef"><span class="vm">4,620,000</span></td></tr>
+<tr><td style="padding:5px 8px;border:1px solid #e6eaef;text-align:left;font-family:'IBM Plex Sans KR'">게이트밸브</td><td style="padding:5px 8px;border:1px solid #e6eaef">870,000</td><td style="padding:5px 8px;border:1px solid #e6eaef"><span class="vm">957,000</span></td></tr>
+</tbody>
+</table>
+<div style="background:#fdf1f0;border:1px solid #e6b3ad;border-radius:6px;padding:11px 13px;font:400 11.5px/1.55 'IBM Plex Sans KR';color:#a5382f"><b style="font-weight:600">⚠ 이상치 감지 — 부가세 이중 반영 의심</b><br/>견적서에 "부가세 포함" 표기가 있으나 <b>'별도'</b>로 선택됨. 밸브 항목 견적금액이 원가서 대비 +10% (부가세 상당). 확인 후 진행하세요.</div>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-AS4" data-tool="A" open>
+      <summary>
+        <span class="screen-index">05</span>
+        <span class="screen-summary-main"><b>AS4 · 검증결과 요약</b><small>제비율·합계·법령·조달청 유사사례 비교를 한 화면에 모아 통과 여부와 보완 항목을 판단합니다.</small></span>
+        <span class="req-pill">A-M2 · A-M4 · A-M5 · A-M7</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>계산 결과, 규칙 기반 법령, 조달청 유사사례</p></div>
+          <div><span>출력</span><p>통과/보완요청, 누락 법령, 비교 결과</p></div>
+          <div><span>핵심 규칙</span><p>규칙 기반 필수항목 우선 · API 실패 시 비교 미수행 플래그 · 기준정보 버전 표시</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#243447;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 A</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#8a97a8">종합 검증</span></div>
+<div style="display:flex;background:#dfe4ea;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 13px;color:#5a6472">0 업로드·매핑</span><span style="padding:8px 13px;color:#5a6472">1 유형</span><span style="padding:8px 13px;color:#5a6472">2 원가입력</span><span style="padding:8px 13px;color:#5a6472">3 견적대조</span><span style="padding:8px 13px;background:#fff;color:#1e5eb8;border-top:2px solid #1e5eb8;margin-top:-1px">4 검증요약</span><span style="padding:8px 13px;color:#a0a8b3">5 근거로그</span><span style="padding:8px 13px;color:#a0a8b3">6 확정</span>
+</div>
+<div style="padding:16px 18px;background:#eef1f4">
+<div style="display:flex;gap:12px;margin-bottom:12px">
+<div style="flex:1;background:#fff;border:1px solid #d3d9e0;border-radius:6px;padding:13px 15px"><div style="font:600 11px 'IBM Plex Sans KR';color:#7a8494;margin-bottom:8px">제비율 적용</div><div style="font:500 12px/1.7 'IBM Plex Sans KR';color:#28313d">버전 <b style="font-family:'IBM Plex Mono'">v2026-1H</b><br/>갱신일 <span style="font-family:'IBM Plex Mono'">2026-01-02</span><br/>승인 계약부서 · 감사검토</div><div style="margin-top:8px;font:600 11px 'IBM Plex Sans KR';color:#1e7a45">● 최신 버전 적용</div></div>
+<div style="flex:1;background:#fff;border:1px solid #d3d9e0;border-radius:6px;padding:13px 15px"><div style="font:600 11px 'IBM Plex Sans KR';color:#7a8494;margin-bottom:8px">합계 정합성</div><div style="font:500 12px/1.7 'IBM Plex Sans KR';color:#28313d">항목합 <span style="font-family:'IBM Plex Mono'">14,053,200</span><br/>총계 <span style="font-family:'IBM Plex Mono'">14,053,200</span><br/>차이 <span style="font-family:'IBM Plex Mono';color:#1e7a45">0</span></div><div style="margin-top:8px;font:600 11px 'IBM Plex Sans KR';color:#1e7a45">● 통과 · 부가세 검증 OK</div></div>
+<div style="flex:1;background:#fff;border:1px solid #d3d9e0;border-radius:6px;padding:13px 15px"><div style="font:600 11px 'IBM Plex Sans KR';color:#7a8494;margin-bottom:8px">법령 검증 (규칙기반)</div><div style="font:500 12px/1.7 'IBM Plex Sans KR';color:#28313d">필수조항 <b style="color:#1e7a45">3</b> 충족<br/>누락 <b style="color:#d97706">1</b> (검토필요)<br/>법령 버전 <span style="font-family:'IBM Plex Mono'">v2026-05</span></div><div style="margin-top:8px;font:600 11px 'IBM Plex Sans KR';color:#d97706">▲ 지방계약법 확인</div></div>
+</div>
+<div style="background:#fff;border:1px solid #d3d9e0;border-radius:6px;padding:14px 16px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font:600 12px 'IBM Plex Sans KR';color:#1a2430">조달청 API · 유사 공사명 사례 비교 (A-M5②)</span><span style="font:500 10px 'IBM Plex Sans KR';color:#7a8494;background:#eef1f4;padding:3px 8px;border-radius:10px">키워드: 배관 교체 · 노후 시설</span></div>
+<table style="width:100%;border-collapse:collapse;font:400 11px 'IBM Plex Sans KR';color:#28313d">
+<thead><tr style="background:#f5f7f9;color:#5a6472;font-weight:600;text-align:left"><th style="padding:6px 9px;border:1px solid #e6eaef">유사 공사명</th><th style="padding:6px 9px;border:1px solid #e6eaef;width:70px;text-align:right">유사도</th><th style="padding:6px 9px;border:1px solid #e6eaef">적용 법령·조항</th><th style="padding:6px 9px;border:1px solid #e6eaef;width:150px">비교 결과</th></tr></thead>
+<tbody>
+<tr><td style="padding:6px 9px;border:1px solid #e6eaef">○○청 상수도관 교체공사</td><td style="padding:6px 9px;border:1px solid #e6eaef;text-align:right;font-family:'IBM Plex Mono'">92%</td><td style="padding:6px 9px;border:1px solid #e6eaef">국가계약법 제7조 · 시행령 제42조</td><td style="padding:6px 9px;border:1px solid #e6eaef;color:#1e7a45">일치</td></tr>
+<tr><td style="padding:6px 9px;border:1px solid #e6eaef">△△ 노후배관 개량공사</td><td style="padding:6px 9px;border:1px solid #e6eaef;text-align:right;font-family:'IBM Plex Mono'">87%</td><td style="padding:6px 9px;border:1px solid #e6eaef">+ 건설산업기본법 제9조</td><td style="padding:6px 9px;border:1px solid #e6eaef;color:#1e7a45">일치</td></tr>
+<tr style="background:#fdf7ec"><td style="padding:6px 9px;border:1px solid #e6eaef">□□ 배관보수 및 밸브교체</td><td style="padding:6px 9px;border:1px solid #e6eaef;text-align:right;font-family:'IBM Plex Mono'">79%</td><td style="padding:6px 9px;border:1px solid #e6eaef">+ 지방계약법 시행령</td><td style="padding:6px 9px;border:1px solid #e6eaef;color:#d97706;font-weight:600">사례에만 존재 · 검토필요</td></tr>
+</tbody>
+</table>
+<div style="margin-top:9px;font:400 10.5px 'IBM Plex Sans KR';color:#7a8494">"사례에만 존재" 항목은 B-M3(AI 추천) 프롬프트 입력 근거로 전달됩니다 · 기준정보: 제비율 v2026-1H / 법령 v2026-05 / 표준항목 v2026-04 / 템플릿 v3</div>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-AS5" data-tool="A" open>
+      <summary>
+        <span class="screen-index">06</span>
+        <span class="screen-summary-main"><b>AS5 · 계산근거 로그</b><small>누가 어떤 기준과 계산식으로 값을 확정했는지 감사·재현 가능한 로그를 제공합니다.</small></span>
+        <span class="req-pill">A-M6 · A-M7</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>검증 이벤트, 기준정보 버전, 사용자 조치</p></div>
+          <div><span>출력</span><p>타임스탬프·근거·변경 이력 로그</p></div>
+          <div><span>핵심 규칙</span><p>변경 전후 값 기록 · 모델/프롬프트와 기준정보 버전 보존 · 과거 산출물 재현</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#243447;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 A</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#8a97a8">2026-07-07 · immutable</span></div>
+<div style="display:flex;background:#dfe4ea;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 13px;color:#5a6472">0 업로드·매핑</span><span style="padding:8px 13px;color:#5a6472">1 유형</span><span style="padding:8px 13px;color:#5a6472">2 원가입력</span><span style="padding:8px 13px;color:#5a6472">3 견적대조</span><span style="padding:8px 13px;color:#5a6472">4 검증요약</span><span style="padding:8px 13px;background:#fff;color:#1e5eb8;border-top:2px solid #1e5eb8;margin-top:-1px">5 근거로그</span><span style="padding:8px 13px;color:#a0a8b3">6 확정</span>
+</div>
+<div style="padding:14px 18px;background:#fff">
+<table style="width:100%;border-collapse:collapse;font:400 11px 'IBM Plex Sans KR';color:#28313d">
+<thead><tr style="background:#f5f7f9;color:#5a6472;font-weight:600;text-align:left"><th style="padding:6px 9px;border:1px solid #e6eaef;width:130px">시각</th><th style="padding:6px 9px;border:1px solid #e6eaef;width:150px">단계 / 항목</th><th style="padding:6px 9px;border:1px solid #e6eaef">적용 근거</th><th style="padding:6px 9px;border:1px solid #e6eaef;width:150px">버전 / 승인</th></tr></thead>
+<tbody style="font-size:10.8px">
+<tr><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">14:22:03</td><td style="padding:5px 9px;border:1px solid #e6eaef">업로드</td><td style="padding:5px 9px;border:1px solid #e6eaef">파일해시 3f9a…c1e2 기록, 시트 3개 스캔</td><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono'">—</td></tr>
+<tr><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">14:23:10</td><td style="padding:5px 9px;border:1px solid #e6eaef">제비율 · 간접노무비</td><td style="padding:5px 9px;border:1px solid #e6eaef">12.4% 적용 (직접노무비 기준)</td><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono'">v2026-1H · 계약부서</td></tr>
+<tr><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">14:23:11</td><td style="padding:5px 9px;border:1px solid #e6eaef">제비율 · 산재보험료</td><td style="padding:5px 9px;border:1px solid #e6eaef">3.7% 적용</td><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono'">v2026-1H · 계약부서</td></tr>
+<tr><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">14:24:02</td><td style="padding:5px 9px;border:1px solid #e6eaef">합계 재계산</td><td style="padding:5px 9px;border:1px solid #e6eaef">항목합 14,053,200 = 총계, 차이 0 · 부가세 별도 확정</td><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono'">고정로직</td></tr>
+<tr><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">14:25:18</td><td style="padding:5px 9px;border:1px solid #e6eaef">법령 · 규칙매칭</td><td style="padding:5px 9px;border:1px solid #e6eaef">국가계약법 제7조·시행령42, 건산법 제9조 매칭</td><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono'">법령 v2026-05</td></tr>
+<tr><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">14:25:44</td><td style="padding:5px 9px;border:1px solid #e6eaef">조달청 유사사례</td><td style="padding:5px 9px;border:1px solid #e6eaef">3건 조회 (유사도 92/87/79%)</td><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono'">API 2026-07-07</td></tr>
+<tr style="background:#fdf7ec"><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono';color:#5a6472">14:25:45</td><td style="padding:5px 9px;border:1px solid #e6eaef">비교결과 플래그</td><td style="padding:5px 9px;border:1px solid #e6eaef;color:#a5720c">지방계약법 = "사례에만 존재" → B-M3 근거 전달</td><td style="padding:5px 9px;border:1px solid #e6eaef;font-family:'IBM Plex Mono'">—</td></tr>
+</tbody>
+</table>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-AS6" data-tool="A" open>
+      <summary>
+        <span class="screen-index">07</span>
+        <span class="screen-summary-main"><b>AS6 · 확정·내보내기</b><small>모든 필수 검증을 통과한 원가설계 데이터를 불변 버전으로 확정하고 도구 B에 전달합니다.</small></span>
+        <span class="req-pill">A→B 연계</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>도구 A 검증 결과 전체</p></div>
+          <div><span>출력</span><p>파일 A 통과본, 확정 JSON, 엑셀</p></div>
+          <div><span>핵심 규칙</span><p>미통과 항목 존재 시 확정 비활성화 · 수정 시 새 버전 분기 · 전달 실패 시 JSON 대체</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#243447;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 A</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#8a97a8">상태: 검증완료</span></div>
+<div style="display:flex;background:#dfe4ea;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 13px;color:#5a6472">0 업로드·매핑</span><span style="padding:8px 13px;color:#5a6472">1 유형</span><span style="padding:8px 13px;color:#5a6472">2 원가입력</span><span style="padding:8px 13px;color:#5a6472">3 견적대조</span><span style="padding:8px 13px;color:#5a6472">4 검증요약</span><span style="padding:8px 13px;color:#5a6472">5 근거로그</span><span style="padding:8px 13px;background:#fff;color:#1e5eb8;border-top:2px solid #1e5eb8;margin-top:-1px">6 확정</span>
+</div>
+<div style="display:flex">
+<div style="flex:1;background:#fff;padding:18px 20px">
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:12px">확정 전 검증 체크리스트</div>
+<div style="display:flex;flex-direction:column;gap:7px;font:500 12px 'IBM Plex Sans KR';color:#28313d">
+<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 합계 정합성 — 차이 0원</div>
+<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 부가세 포함/별도 선택 완료 (별도)</div>
+<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 제비율 최신 버전 적용 (v2026-1H)</div>
+<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 법령 규칙기반 필수조항 충족</div>
+<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;background:#fdf7ec;border:1px solid #ecd9a8;border-radius:5px"><span style="color:#d97706;font-weight:700">▲</span> 조달청 비교 1건 검토표시 (지방계약법) — 도구 B로 전달</div>
+</div>
+</div>
+<div style="width:280px;flex:none;background:#f2f5f8;padding:18px 18px;border-left:1px solid #d3d9e0">
+<div style="font:600 11px 'IBM Plex Sans KR';color:#5a6472;margin-bottom:10px">원가설계 확정</div>
+<div style="background:#1e5eb8;color:#fff;text-align:center;font:700 13px 'IBM Plex Sans KR';padding:12px;border-radius:6px;margin-bottom:6px">원가설계 확정 (통과)</div>
+<div style="font:400 10.5px/1.5 'IBM Plex Sans KR';color:#7a8494;margin-bottom:16px">확정 시 §11.1 스키마 불변 처리 · 감사 로그 생성</div>
+<div style="font:600 11px 'IBM Plex Sans KR';color:#5a6472;margin-bottom:8px">산출물</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:center;gap:8px;border:1px solid #c7cdd6;border-radius:5px;padding:8px 11px;font:600 11.5px 'IBM Plex Sans KR';color:#28313d;background:#fff"><span style="width:20px;height:24px;border-radius:3px;background:#1e7a45;color:#fff;font:700 8px 'IBM Plex Sans KR';display:flex;align-items:center;justify-content:center">XLS</span> 엑셀 (파일 A 통과본)</div>
+<div style="display:flex;align-items:center;gap:8px;border:1px solid #1e5eb8;border-radius:5px;padding:8px 11px;font:600 11.5px 'IBM Plex Sans KR';color:#1e5eb8;background:#f3f8fe">→ 도구 B로 데이터 전달</div>
+</div>
+<div style="margin-top:14px;font:400 10px/1.5 'IBM Plex Mono';color:#a0a8b3">confirmed_by 은영<br/>confirmed_at 2026-07-07 14:26:31</div>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-BS1" data-tool="B" open>
+      <summary>
+        <span class="screen-index">08</span>
+        <span class="screen-summary-main"><b>BS1 · 원가설계서 불러오기</b><small>도구 A 통과본을 불러와 공고문 생성에 필요한 핵심 데이터를 확인합니다.</small></span>
+        <span class="req-pill">B-M1</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>확정 JSON 또는 같은 세션 데이터</p></div>
+          <div><span>출력</span><p>공고문 기본정보·금액·법령 초깃값</p></div>
+          <div><span>핵심 규칙</span><p>통과 상태 및 스키마 버전 확인 · 필수값 누락 시 생성 보류</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#2b2f45;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 B</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#9098b8">입찰공고문 자동작성</span></div>
+<div style="display:flex;background:#e2e3ec;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 14px;background:#fff;color:#4a3fb8;border-top:2px solid #4a3fb8;margin-top:-1px">1 불러오기</span><span style="padding:8px 14px;color:#a0a8b3">2 날짜·기한</span><span style="padding:8px 14px;color:#a0a8b3">3 AI 법령추천</span><span style="padding:8px 14px;color:#a0a8b3">4 미리보기</span><span style="padding:8px 14px;color:#a0a8b3">5 내보내기</span>
+</div>
+<div style="padding:18px 20px;background:#fff">
+<div style="display:flex;gap:14px;align-items:center;border:1.5px solid #c6c3ef;background:#f5f4fe;border-radius:6px;padding:14px 16px;margin-bottom:16px">
+<div style="width:40px;height:40px;border-radius:50%;background:#1e7a45;display:flex;align-items:center;justify-content:center;color:#fff;font:700 15px 'IBM Plex Sans KR'">✓</div>
+<div style="flex:1"><div style="font:600 13px 'IBM Plex Sans KR';color:#1a2430">본관 노후 상수도 배관 교체공사 · 통과본</div><div style="font:500 10.5px 'IBM Plex Mono';color:#7a8494;margin-top:3px">project_id 2026-0147 · confirmed 14:26:31 · 상태 통과 (immutable)</div></div>
+<span style="font:600 12px 'IBM Plex Sans KR';color:#fff;background:#4a3fb8;padding:8px 15px;border-radius:5px">공고문 초안 생성 →</span>
+</div>
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:10px">데이터 미리보기 (§11.1 확정 스키마)</div>
+<table style="width:100%;border-collapse:collapse;font:400 11.5px 'IBM Plex Sans KR';color:#28313d">
+<tbody>
+<tr style="border-top:1px solid #e6eaef"><td style="width:150px;background:#f5f7f9;padding:7px 10px;font-weight:600;color:#4a5462">추정가격</td><td style="padding:7px 10px;font-family:'IBM Plex Mono'">₩187,450,000 <span style="font-family:'IBM Plex Sans KR';color:#7a8494;font-size:11px">(부가세 별도)</span></td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:7px 10px;font-weight:600;color:#4a5462">계약방법</td><td style="padding:7px 10px">제한경쟁입찰 · 적격심사낙찰제</td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:7px 10px;font-weight:600;color:#4a5462">법령 (규칙기반)</td><td style="padding:7px 10px">국가계약법 제7조 · 시행령 제42조 · 건설산업기본법 제9조</td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:7px 10px;font-weight:600;color:#4a5462">조달청 비교 플래그</td><td style="padding:7px 10px;color:#a5720c">지방계약법 — 사례에만 존재 (AI 추천 검토 대상)</td></tr>
+</tbody>
+</table>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-BS2" data-tool="B" open>
+      <summary>
+        <span class="screen-index">09</span>
+        <span class="screen-summary-main"><b>BS2 · 날짜·기한 입력</b><small>공고일·접수·마감·개찰·계약기간을 한 곳에서 입력하고 문서 전체에 일관되게 반영합니다.</small></span>
+        <span class="req-pill">B-M2</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>핵심 일정·기한</p></div>
+          <div><span>출력</span><p>검증된 일정 세트</p></div>
+          <div><span>핵심 규칙</span><p>공고일 < 마감일 ≤ 개찰일 · 필수일자 누락 차단 · 중복 위치 자동 동기화</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#2b2f45;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 B</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#9098b8">2026-0147</span></div>
+<div style="display:flex;background:#e2e3ec;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 14px;color:#5a6472">1 불러오기</span><span style="padding:8px 14px;background:#fff;color:#4a3fb8;border-top:2px solid #4a3fb8;margin-top:-1px">2 날짜·기한</span><span style="padding:8px 14px;color:#a0a8b3">3 AI 법령추천</span><span style="padding:8px 14px;color:#a0a8b3">4 미리보기</span><span style="padding:8px 14px;color:#a0a8b3">5 내보내기</span>
+</div>
+<div style="display:flex">
+<div style="width:360px;flex:none;background:#fff;padding:18px 20px;border-right:1px solid #d3d9e0">
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:12px">핵심 날짜 (단일 입력)</div>
+<div style="display:flex;flex-direction:column;gap:10px;font:500 11.5px 'IBM Plex Sans KR';color:#4a5462">
+<label style="display:flex;flex-direction:column;gap:4px">공고일<span style="font-family:'IBM Plex Mono';border:1px solid #c7cdd6;border-radius:5px;padding:8px 11px;color:#1a2430;background:#fbfcfd">2026-07-07</span></label>
+<label style="display:flex;flex-direction:column;gap:4px">입찰서 접수 개시<span style="font-family:'IBM Plex Mono';border:1px solid #c7cdd6;border-radius:5px;padding:8px 11px;color:#1a2430;background:#fbfcfd">2026-07-14 09:00</span></label>
+<label style="display:flex;flex-direction:column;gap:4px">입찰서 접수 마감<span style="font-family:'IBM Plex Mono';border:1px solid #4a3fb8;border-radius:5px;padding:8px 11px;color:#1a2430;background:#f5f4fe">2026-07-21 10:00</span></label>
+<label style="display:flex;flex-direction:column;gap:4px">개찰일시<span style="font-family:'IBM Plex Mono';border:1px solid #c7cdd6;border-radius:5px;padding:8px 11px;color:#1a2430;background:#fbfcfd">2026-07-21 11:00</span></label>
+</div>
+</div>
+<div style="flex:1;background:#fff;padding:18px 20px">
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:10px">문서 내 자동 반영 위치 <span style="color:#7a8494;font-weight:500">· 5곳</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;font:400 11.5px 'IBM Plex Sans KR';color:#28313d;margin-bottom:16px">
+<div style="padding:7px 11px;background:#f5f7f9;border-radius:5px">§1 입찰일정 표  ·  <span class="va">2026-07-21 10:00</span></div>
+<div style="padding:7px 11px;background:#f5f7f9;border-radius:5px">§4 제출 안내문  ·  <span class="va">마감 07-21</span></div>
+<div style="padding:7px 11px;background:#f5f7f9;border-radius:5px">공고 표지 상단  ·  <span class="va">공고일 07-07</span></div>
+</div>
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:8px">날짜 논리 검증</div>
+<div style="display:flex;flex-direction:column;gap:6px;font:500 11.5px 'IBM Plex Sans KR'">
+<div style="padding:7px 11px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px;color:#1e7a45">✓ 공고일 &lt; 접수마감 &lt; 개찰일시</div>
+<div style="padding:7px 11px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px;color:#1e7a45">✓ 접수기간 7일 이상 확보 (전자입찰 기준)</div>
+<div style="padding:7px 11px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px;color:#1e7a45">✓ 필수 날짜 4/4 입력 완료</div>
+</div>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-BS3" data-tool="B" open>
+      <summary>
+        <span class="screen-index">10</span>
+        <span class="screen-summary-main"><b>BS3 · AI 법령추천 결과</b><small>원가설계와 유사사례를 바탕으로 법령 누락·보완 후보를 제시하고 사람이 채택·수정·기각합니다.</small></span>
+        <span class="req-pill">B-M3 · B-M5</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>원가 데이터, 공사내용, 규칙 결과, 유사사례</p></div>
+          <div><span>출력</span><p>추천 법령·근거·출처·판단 이력</p></div>
+          <div><span>핵심 규칙</span><p>최종 판단은 사용자 · 판단 사유 필수 · 모델/프롬프트 버전과 시각 기록</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#2b2f45;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 B</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#9098b8">claude · prompt v1.3</span></div>
+<div style="display:flex;background:#e2e3ec;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 14px;color:#5a6472">1 불러오기</span><span style="padding:8px 14px;color:#5a6472">2 날짜·기한</span><span style="padding:8px 14px;background:#fff;color:#4a3fb8;border-top:2px solid #4a3fb8;margin-top:-1px">3 AI 법령추천</span><span style="padding:8px 14px;color:#a0a8b3">4 미리보기</span><span style="padding:8px 14px;color:#a0a8b3">5 내보내기</span>
+</div>
+<div style="padding:16px 20px;background:#fff">
+<div style="display:flex;align-items:center;gap:9px;background:#f5f4fe;border:1px solid #d3cff2;border-radius:6px;padding:10px 13px;margin-bottom:14px;font:500 11.5px/1.5 'IBM Plex Sans KR';color:#4a3fb8"><span style="font-size:15px">👤</span> AI 추천은 <b>참고용</b>이며 최종 확정은 담당자가 합니다. 각 항목을 채택·수정·기각하고 판단 사유를 기록하세요. (판단 대체 금지 원칙)</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="border:1px solid #d3d9e0;border-radius:6px;padding:13px 15px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div style="flex:1"><div style="font:700 12.5px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:4px">「건설산업기본법」 제9조 <span class="vi">AI 추천</span></div><div style="font:400 11px/1.55 'IBM Plex Sans KR';color:#5a6472">근거: 기계설비공사업 등록이 필요한 배관 교체공사로 판단 · 출처: 조달청 유사사례 2건(87%) + 규칙기반 매칭</div></div>
+<span style="font:600 11px 'IBM Plex Sans KR';color:#1e7a45;background:#e3f4ea;padding:6px 12px;border-radius:5px;white-space:nowrap">채택됨 ✓</span>
+</div>
+</div>
+<div style="border:1.5px solid #ecd9a8;border-radius:6px;padding:13px 15px;background:#fffdf7">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div style="flex:1"><div style="font:700 12.5px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:4px">「지방계약법 시행령」 적용 검토 <span class="vi">AI 추천</span> <span style="font:600 10px 'IBM Plex Sans KR';color:#a5720c;background:#f7ecd3;padding:2px 7px;border-radius:9px">미검토</span></div><div style="font:400 11px/1.55 'IBM Plex Sans KR';color:#5a6472">근거: A-S4 조달청 비교에서 "사례에만 존재"로 분류(79%). 발주기관이 지방자치단체인 경우 적용 · 출처: □□ 배관보수공사 사례</div></div>
+<div style="display:flex;gap:5px;white-space:nowrap"><span style="font:600 11px 'IBM Plex Sans KR';color:#fff;background:#1e7a45;padding:6px 11px;border-radius:5px">채택</span><span style="font:600 11px 'IBM Plex Sans KR';color:#4a5462;background:#eef1f4;border:1px solid #c7cdd6;padding:6px 11px;border-radius:5px">수정</span><span style="font:600 11px 'IBM Plex Sans KR';color:#b23b30;background:#fbeceb;border:1px solid #e6b3ad;padding:6px 11px;border-radius:5px">기각</span></div>
+</div>
+<input placeholder="판단 사유 입력 (예: 발주기관 국가기관 → 지방계약법 미적용)" style="width:100%;box-sizing:border-box;margin-top:10px;border:1px solid #c7cdd6;border-radius:5px;padding:7px 10px;font:400 11px 'IBM Plex Sans KR';color:#7a8494;background:#fff"/>
+</div>
+</div>
+<div style="margin-top:12px;font:400 10.5px 'IBM Plex Mono';color:#a0a8b3">추천 이력(B-M5): model·prompt 버전, 채택/수정/기각, 판단사유, timestamp 기록 · 규칙기반 필수항목 우선, AI 추천은 보완 후보 (§16)</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-BS4" data-tool="B" open>
+      <summary>
+        <span class="screen-index">11</span>
+        <span class="screen-summary-main"><b>BS4 · 공고문 미리보기</b><small>자동채움·AI추천·직접입력·미입력 값을 출처별로 구분하여 최종 문서를 검토합니다.</small></span>
+        <span class="req-pill">B-M1 · B-M2 · B-M3</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>공고문 변수 전체</p></div>
+          <div><span>출력</span><p>표준 템플릿 기반 공고문 초안</p></div>
+          <div><span>핵심 규칙</span><p>값 출처 색상 태그 · 미입력 위치 강조 · 법령·날짜·금액 교차검토</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#2b2f45;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 B</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#9098b8">파일 A 통과본 · 2026-0147</span></div>
+<div style="display:flex;background:#e2e3ec;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 14px;color:#5a6472">1 불러오기</span><span style="padding:8px 14px;color:#5a6472">2 날짜·기한</span><span style="padding:8px 14px;color:#5a6472">3 AI 법령추천</span><span style="padding:8px 14px;background:#fff;color:#4a3fb8;border-top:2px solid #4a3fb8;margin-top:-1px">4 미리보기</span><span style="padding:8px 14px;color:#a0a8b3">5 내보내기</span>
+</div>
+<div style="display:flex">
+<div style="flex:1;background:#fff;padding:20px 24px 24px;border-right:1px solid #d3d9e0">
+<div style="border-bottom:1.5px solid #2b2f45;padding-bottom:8px;margin-bottom:14px"><div style="font:600 11px 'IBM Plex Sans KR';color:#7a8494">입찰공고 제2026-0147호</div><div style="font:700 17px 'IBM Plex Sans KR';color:#1a2430;margin-top:2px">본관 노후 상수도 배관 교체공사</div></div>
+<table style="width:100%;border-collapse:collapse;font:400 11.5px/1.5 'IBM Plex Sans KR';color:#28313d">
+<tbody>
+<tr style="border-top:1px solid #e6eaef"><td style="width:110px;background:#f5f7f9;padding:6px 10px;font-weight:600;color:#4a5462">공사명</td><td style="padding:6px 10px"><span class="va">본관 노후 상수도 배관 교체공사</span></td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:6px 10px;font-weight:600;color:#4a5462">추정가격</td><td style="padding:6px 10px;font-family:'IBM Plex Mono'"><span class="va">₩187,450,000</span> <span style="color:#7a8494;font-family:'IBM Plex Sans KR';font-size:11px">(부가세 별도)</span></td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:6px 10px;font-weight:600;color:#4a5462">계약방법</td><td style="padding:6px 10px"><span class="vm">제한경쟁입찰</span> · 낙찰 <span class="vi">적격심사낙찰제</span></td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:6px 10px;font-weight:600;color:#4a5462">참가자격</td><td style="padding:6px 10px"><span class="vi">「건설산업기본법」 기계설비공사업 등록</span> · <span class="vm">조달청 참가자격 등록</span></td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:6px 10px;font-weight:600;color:#4a5462;vertical-align:top">입찰일정</td><td style="padding:6px 10px;font-family:'IBM Plex Mono';font-size:11px;line-height:1.7">접수 <span class="va">2026-07-14 09:00</span> ~ <span class="va">07-21 10:00</span> · 개찰 <span class="va">07-21 11:00</span></td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:6px 10px;font-weight:600;color:#4a5462;vertical-align:top">관련법령</td><td style="padding:6px 10px;line-height:1.7"><span class="va">「국가계약법」 제7조</span> · <span class="vi">시행령 제42조</span> · <span class="vi">「건설산업기본법」 제9조</span><br/><span class="vx">지방계약법 적용여부 — 미입력</span></td></tr>
+<tr style="border-top:1px solid #e6eaef"><td style="background:#f5f7f9;padding:6px 10px;font-weight:600;color:#4a5462;vertical-align:top">제출서류</td><td style="padding:6px 10px;line-height:1.7"><span class="va">입찰참가신청서, 산출내역서</span><br/><span class="vx">추가 제출서류 — 미입력</span></td></tr>
+</tbody>
+</table>
+</div>
+<div style="width:250px;flex:none;background:#f2f5f8;padding:16px 16px">
+<div style="font:600 11px 'IBM Plex Sans KR';color:#5a6472;margin-bottom:8px">값 출처</div>
+<table style="width:100%;border-collapse:collapse;font:500 11.5px 'IBM Plex Sans KR';margin-bottom:14px">
+<tbody>
+<tr><td style="padding:4px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#1e5eb8;margin-right:7px"></span>자동채움</td><td style="text-align:right;font-family:'IBM Plex Mono';font-weight:600">12</td></tr>
+<tr><td style="padding:4px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#8b3ad6;margin-right:7px"></span>AI 추천</td><td style="text-align:right;font-family:'IBM Plex Mono';font-weight:600;color:#7c3aed">4</td></tr>
+<tr><td style="padding:4px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#159447;margin-right:7px"></span>직접입력</td><td style="text-align:right;font-family:'IBM Plex Mono';font-weight:600">6</td></tr>
+<tr><td style="padding:4px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;border:1px dashed #c4362c;margin-right:7px"></span>미입력</td><td style="text-align:right;font-family:'IBM Plex Mono';font-weight:600;color:#c4362c">2</td></tr>
+</tbody>
+</table>
+<div style="background:#fbeceb;border:1px solid #e6b3ad;border-radius:4px;padding:9px 11px;font:400 11px/1.5 'IBM Plex Sans KR';color:#a5382f"><b style="font-weight:600">⚠ 내보내기 차단</b><br/>미입력 2건 · AI추천 미검토</div>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+
+    <details class="screen-card" id="screen-BS5" data-tool="B" open>
+      <summary>
+        <span class="screen-index">12</span>
+        <span class="screen-summary-main"><b>BS5 · 최종 확정·내보내기</b><small>내보내기 차단 조건을 최종 점검하고 엑셀·PDF·HWP 산출물을 생성합니다.</small></span>
+        <span class="req-pill">B-M4 · B-M6</span>
+        <span class="chevron">⌄</span>
+      </summary>
+      <div class="screen-body">
+        <div class="screen-facts">
+          <div><span>입력</span><p>승인된 공고문, 검토·예외승인 상태</p></div>
+          <div><span>출력</span><p>최종 공고문과 내보내기 검증 로그</p></div>
+          <div><span>핵심 규칙</span><p>합계·부가세·날짜·AI 미검토 차단 · HWP 열림/서식/값 일치 검증</p></div>
+        </div>
+        <div class="mockup-scroll"><div style="width:1020px;background:#eef1f4;border:1px solid #c7cdd6;border-radius:5px;box-shadow:0 6px 22px rgba(40,50,66,.14);overflow:hidden">
+<div style="background:#2b2f45;color:#cdd6e2;padding:0 16px;display:flex;align-items:center;height:36px;font:600 11.5px 'IBM Plex Sans KR'"><span style="color:#fff;margin-right:18px;letter-spacing:.04em">BidGen · 도구 B</span><span style="margin-left:auto;font:500 10.5px 'IBM Plex Mono';color:#9098b8">상태: 최종확정</span></div>
+<div style="display:flex;background:#e2e3ec;border-bottom:1px solid #c7cdd6;font:500 11.5px 'IBM Plex Sans KR'">
+<span style="padding:8px 14px;color:#5a6472">1 불러오기</span><span style="padding:8px 14px;color:#5a6472">2 날짜·기한</span><span style="padding:8px 14px;color:#5a6472">3 AI 법령추천</span><span style="padding:8px 14px;color:#5a6472">4 미리보기</span><span style="padding:8px 14px;background:#fff;color:#4a3fb8;border-top:2px solid #4a3fb8;margin-top:-1px">5 내보내기</span>
+</div>
+<div style="display:flex">
+<div style="flex:1;background:#fff;padding:18px 20px">
+<div style="font:600 12px 'IBM Plex Sans KR';color:#1a2430;margin-bottom:12px">내보내기 차단조건 점검 (§17)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font:500 11.5px 'IBM Plex Sans KR';color:#28313d">
+<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 합계 일치</div>
+<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 부가세 선택</div>
+<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 필수 날짜 완비</div>
+<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 날짜 논리 통과</div>
+<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> AI 추천 검토완료</div>
+<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px"><span style="color:#1e7a45;font-weight:700">✓</span> 필수 법령 확정</div>
+<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f2faf5;border:1px solid #c3e6d1;border-radius:5px;grid-column:span 2"><span style="color:#1e7a45;font-weight:700">✓</span> 기준정보 승인 버전 사용 (제비율 v2026-1H · 템플릿 v3)</div>
+</div>
+<div style="margin-top:12px;font:400 10.5px/1.5 'IBM Plex Mono';color:#a0a8b3">decision_by 은영 · 지방계약법 기각(발주기관=국가기관) 사유 기록 · 미입력 2건 해소 완료</div>
+</div>
+<div style="width:280px;flex:none;background:#f2f5f8;padding:18px 18px;border-left:1px solid #d3d9e0">
+<div style="display:flex;align-items:center;gap:8px;background:#e3f4ea;border:1px solid #b3ddc4;border-radius:5px;padding:9px 12px;margin-bottom:14px;font:600 12px 'IBM Plex Sans KR';color:#1e7a45">● 모든 차단조건 해소 — 내보내기 가능</div>
+<div style="font:600 11px 'IBM Plex Sans KR';color:#5a6472;margin-bottom:8px">최종 산출물 (B-M4)</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:center;gap:8px;border:1px solid #c7cdd6;border-radius:5px;padding:9px 11px;font:600 11.5px 'IBM Plex Sans KR';color:#28313d;background:#fff"><span style="width:20px;height:24px;border-radius:3px;background:#1e7a45;color:#fff;font:700 8px 'IBM Plex Sans KR';display:flex;align-items:center;justify-content:center">XLS</span> 엑셀</div>
+<div style="display:flex;align-items:center;gap:8px;border:1px solid #c7cdd6;border-radius:5px;padding:9px 11px;font:600 11.5px 'IBM Plex Sans KR';color:#28313d;background:#fff"><span style="width:20px;height:24px;border-radius:3px;background:#c0362c;color:#fff;font:700 8px 'IBM Plex Sans KR';display:flex;align-items:center;justify-content:center">PDF</span> PDF</div>
+<div style="display:flex;align-items:center;gap:8px;border:1px solid #4a3fb8;border-radius:5px;padding:9px 11px;font:600 11.5px 'IBM Plex Sans KR';color:#1a2430;background:#f5f4fe"><span style="width:20px;height:24px;border-radius:3px;background:#2b6cb0;color:#fff;font:700 8px 'IBM Plex Sans KR';display:flex;align-items:center;justify-content:center">HWP</span> 한글 <span style="margin-left:auto;font:600 9px 'IBM Plex Sans KR';color:#1e7a45;background:#e3f4ea;padding:2px 7px;border-radius:9px">템플릿 v1 검증 OK</span></div>
+</div>
+<div style="margin-top:10px;font:400 10px/1.5 'IBM Plex Sans KR';color:#a0a8b3">HWP: 표준 템플릿 1종 열림·서식·값일치 검증 통과 (§18). 실패 시 수동 보정본 첨부.</div>
+</div>
+</div>
+</div></div>
+      </div>
+    </details>
+</section>
+
+<section class="section" id="data">
+  <div class="section-head"><div><div class="kicker">06 · DATA & BUSINESS RULES</div><h2>A→B 표준 데이터와 차단 규칙</h2></div><p>‘통과’ 시점의 데이터는 불변으로 잠그고 수정이 필요하면 새 버전으로 분기합니다. 각 산출물은 당시 기준정보로 재현 가능해야 합니다.</p></div>
+  <div class="schema-grid">
+    <article class="schema-card"><h3>원가설계 확정 데이터</h3><code>project_id, project_name, project_type
+source_file_name, source_file_hash
+mapping_status, unmapped_fields
+items[] { quantity, unit_price, amount, vat_type }
+rates[] { rate_value, rate_version, effective_date }
+subtotal, vat_amount, total_amount, difference
+matched_laws, missing_laws
+reference_projects, similarity_score
+confirmed_by, confirmed_at, change_log</code></article>
+    <article class="schema-card"><h3>공고문 생성 데이터</h3><code>notice_date, bid_start_date, bid_deadline
+opening_date, contract_period
+bid_method, contract_method, eligibility
+recommended_laws, recommendation_reason
+source_reference, model_version, prompt_version
+decision_status, decision_reason, decision_by
+export_format, template_version
+exported_at, export_validation_status</code></article>
+  </div>
+  <h3 style="margin:30px 0 12px">내보내기 차단 조건</h3>
+  <div class="blockers"><div class="blocker"><i>×</i><div><b>합계 불일치</b><p>예외승인 불가. 차액이 0이 될 때까지 수정.</p></div></div><div class="blocker"><i>×</i><div><b>부가세 미선택</b><p>항목별 포함/별도 값 필수.</p></div></div><div class="blocker"><i>×</i><div><b>필수 날짜 누락·역전</b><p>공고일·마감일 논리 오류 즉시 차단.</p></div></div><div class="blocker"><i>×</i><div><b>AI 추천 미검토</b><p>채택·수정·기각 중 하나를 확정해야 함.</p></div></div><div class="blocker"><i>!</i><div><b>필수 법령 누락</b><p>검토자 예외승인 가능, 사유 필수.</p></div></div><div class="blocker"><i>!</i><div><b>HWP 출력 검증 실패</b><p>확정본 표시 금지, 수동 보정본 첨부.</p></div></div></div>
+</section>
+
+<section class="section" id="quality">
+  <div class="section-head"><div><div class="kicker">07 · QUALITY, SECURITY & OPERATION</div><h2>파일럿을 업무 사용 수준으로 검증</h2></div><p>기능이 동작하는 것과 업무 산출물로 안전하게 사용할 수 있는 것을 분리하여 검증합니다.</p></div>
+  <div class="grid-3"><article class="card"><div class="no">TEST DATA</div><h3>골든 데이터셋</h3><p>정상 원가설계 6건, 합계·부가세·제비율 오류, 날짜 오류, 법령 누락, 표준 HWP 템플릿 1종.</p></article><article class="card"><div class="no">SECURITY</div><h3>프록시·마스킹 원칙</h3><p>브라우저 코드에 API 키 저장 금지. 외부 호출 전 업체명 마스킹·불필요한 첨부 제외.</p></article><article class="card"><div class="no">AUDITABILITY</div><h3>판단 이력 보존</h3><p>추천 결과, 출처, 모델·프롬프트 버전, 채택/기각 사유, 사용자와 타임스탬프를 기록.</p></article></div>
+  <div class="table-wrap" style="margin-top:18px"><table class="spec"><thead><tr><th>검증 영역</th><th>합격 기준</th><th>실패 시 조치</th></tr></thead><tbody><tr><td>계산·합계</td><td>기준값 100% 일치, 삽입 오류 100% 탐지</td><td>통과/확정 비활성화</td></tr><tr><td>날짜</td><td>누락·역전 오류 100% 탐지</td><td>공고문 내보내기 차단</td></tr><tr><td>법령·AI</td><td>필수 누락 경고, 추천 이력 100% 기록</td><td>규칙 결과 유지, 재시도·수동 판단</td></tr><tr><td>HWP</td><td>정상 열림, 핵심 변수 100% 일치, 표·문단 유지</td><td>수동 보정 절차와 한계 기록</td></tr><tr><td>회귀 테스트</td><td>기준정보 변경 후 기존 정상 케이스 유지</td><td>변경 버전 롤백 또는 수정</td></tr></tbody></table></div>
+</section>
+
+<section class="section" id="roadmap">
+  <div class="section-head"><div><div class="kicker">08 · RELEASE & OPEN DECISIONS</div><h2>개발 순서와 착수 전 확정사항</h2></div><p>v1.6에서 업로드 단계와 기준정보 관리가 추가되었으므로 기존 릴리스 표의 범위를 보정해야 합니다.</p></div>
+  <div class="release"><article class="release-card"><b>1차 · 도구 A 코어</b><p><b>A-M0~A-M4</b><br>업로드·매핑, 표준 입력, 제비율, 견적, 합계 검증</p></article><article class="release-card"><b>2차 · 도구 A 완성</b><p><b>A-M5~A-M7</b><br>법령·유사사례, 계산근거 로그, 기준정보 버전</p></article><article class="release-card"><b>3차 · 도구 B 코어</b><p><b>B-M1~B-M6</b><br>A→B 연계, 일정, AI 추천, 산출물과 차단조건</p></article><article class="release-card"><b>4차 · 파일럿 보완</b><p><b>Should</b><br>OCR, 체크리스트, 공개데이터 갱신, 사용성 개선</p></article></div>
+  <h3 style="margin:32px 0 13px">결정 필요사항</h3>
+  <div class="decision-list"><div class="decision"><div><b>MVP 범위 문구에 A-M0 명시</b><p>§2.3의 A-M1~A-M7 표기를 A-M0~A-M7로 정정.</p></div><span>필수</span></div><div class="decision"><div><b>릴리스 범위에 A-M0·A-M7 반영</b><p>기존 §8의 1차/2차 범위 누락을 위 보정안처럼 수정.</p></div><span>필수</span></div><div class="decision"><div><b>A→B 전달 방식 확정</b><p>한 HTML 내 세션 연계인지, 도구별 파일 + JSON 교환인지 결정.</p></div><span>아키텍처</span></div><div class="decision"><div><b>제비율 적용 기준일 확정</b><p>작성일·공고일·계약예정일 중 사내 업무 기준을 승인.</p></div><span>업무정책</span></div><div class="decision"><div><b>HWP 구현 경로 기술검증</b><p>템플릿 치환, DOCX 변환, HTML/RTF 중 업무 사용 가능한 방식을 선택.</p></div><span>기술위험</span></div><div class="decision"><div><b>조달청 API 필드·CORS 검증</b><p>유사사례에서 실제로 법령·조항을 수집 가능한지 사전 PoC 필요.</p></div><span>외부연동</span></div></div>
+</section>
+<footer class="footer"><b>BidGen HTML 기획안 v1.6</b><br>근거 문서: BidGen_PRD_v1.6(1).md · 화면 구성 요청.zip / 작성 기준일 2026-07-07</footer>
+</main>
+<button class="mobile-menu" onclick="document.body.classList.toggle('menu-open')">☰</button>
+</div>
+<script>
+const links=[...document.querySelectorAll('#nav a')];
+const sectionTargets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-20% 0px -70% 0px'});
+sectionTargets.forEach(s=>observer.observe(s));
+function toggleAll(open){document.querySelectorAll('.screen-card:not([hidden])').forEach(d=>d.open=open)}
+document.querySelectorAll('.filter-btn[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.filter-btn[data-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const f=btn.dataset.filter;document.querySelectorAll('.screen-card').forEach(card=>{card.hidden=!(f==='all'||card.dataset.tool===f)});
+}));
+links.forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('menu-open')));
+</script>
+</body></html>
