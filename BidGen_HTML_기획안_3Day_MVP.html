@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BidGen 3일 MVP HTML 기획안</title>
+<style>
+:root{
+  --navy:#132238;--navy2:#1d3553;--blue:#2563eb;--blue-soft:#eaf1ff;
+  --green:#16845b;--green-soft:#e9f8f1;--orange:#d97706;--orange-soft:#fff4df;
+  --red:#c24138;--red-soft:#fff0ef;--ink:#172033;--muted:#657187;
+  --line:#dce3ec;--surface:#fff;--canvas:#f5f7fa;--sidebar:248px;
+  --shadow:0 12px 34px rgba(19,34,56,.08)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:Pretendard,'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--navy);color:#d8e1ec;padding:24px 16px;overflow:auto;z-index:20}
+.brand{padding:2px 8px 22px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:14px}
+.brand strong{display:flex;align-items:center;gap:10px;color:#fff;font-size:16px}
+.brand i{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:linear-gradient(145deg,#4a84e8,#2563eb);font-style:normal}
+.brand small{display:block;margin-top:7px;color:#91a2b8;font-size:11px}
+.nav-title{margin:17px 9px 6px;color:#70839b;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav a{display:flex;gap:9px;align-items:center;padding:9px 10px;margin:2px 0;border-radius:7px;color:#b9c7d8;text-decoration:none;font-size:12px}
+.nav a:hover,.nav a.active{background:rgba(255,255,255,.09);color:#fff}
+.nav em{width:20px;font:700 10px ui-monospace,SFMono-Regular,Consolas,monospace;color:#75aaf0;font-style:normal}
+.side-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:20px 8px 0}
+.side-actions button{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#d9e2ec;border-radius:7px;padding:8px;cursor:pointer;font-size:11px}
+.main{margin-left:var(--sidebar)}
+.section{max-width:1320px;margin:0 auto;padding:68px 54px;border-bottom:1px solid var(--line);scroll-margin-top:0}
+.hero{max-width:none;min-height:610px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#fff 0%,#f8fafc 60%,#e8f0ff 100%);padding-left:max(54px,calc((100vw - var(--sidebar) - 1320px)/2 + 54px));padding-right:max(54px,calc((100vw - var(--sidebar) - 1320px)/2 + 54px))}
+.eyebrow{display:flex;align-items:center;gap:8px;color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.eyebrow:before{content:'';width:30px;height:2px;background:var(--blue)}
+h1{max-width:930px;margin:18px 0 20px;font-size:clamp(40px,5vw,70px);line-height:1.08;letter-spacing:-.055em}
+.hero p{max-width:900px;margin:0;color:#49576b;font-size:19px;line-height:1.75}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.tags span{padding:7px 11px;border:1px solid #d8e2ef;background:#fff;border-radius:999px;font-size:11px;font-weight:800;color:#45546a}
+.hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;max-width:960px;margin-top:38px}
+.hero-metric{background:rgba(255,255,255,.88);border:1px solid #dae4f0;border-radius:12px;padding:18px 19px;box-shadow:var(--shadow)}
+.hero-metric b{display:block;font:850 26px/1.15 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--navy)}
+.hero-metric span{font-size:11px;color:var(--muted)}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:30px}
+.section-head h2{margin:5px 0 0;font-size:32px;letter-spacing:-.04em}
+.section-head p{max-width:520px;margin:0;color:var(--muted);font-size:13px}
+.kicker{font:850 11px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--blue);letter-spacing:.08em}
+.one-line{background:var(--navy);color:#fff;border-radius:16px;padding:30px 34px;font-size:24px;font-weight:760;letter-spacing:-.035em;line-height:1.55;box-shadow:var(--shadow)}
+.one-line mark{background:transparent;color:#8fc0ff}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:23px;box-shadow:0 5px 20px rgba(19,34,56,.035)}
+.card h3{margin:0 0 8px;font-size:17px;letter-spacing:-.02em}
+.card p{margin:0;color:var(--muted);font-size:13px}
+.card ul{margin:12px 0 0;padding-left:18px;color:#46556b;font-size:12px}
+.card li{margin:6px 0}
+.no{margin-bottom:12px;font:850 10px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--blue);letter-spacing:.07em}
+.problem-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+.problem-item{background:#fff;border:1px solid var(--line);border-top:3px solid var(--red);border-radius:11px;padding:19px}
+.problem-item b{display:block;font-size:14px;margin-bottom:6px}.problem-item p{margin:0;color:var(--muted);font-size:12px}
+.scope-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+.must-list{display:grid;gap:9px}
+.must{display:grid;grid-template-columns:34px 1fr auto;gap:11px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:10px;padding:13px 14px}
+.must i{display:grid;place-items:center;width:27px;height:27px;border-radius:7px;background:var(--blue-soft);color:var(--blue);font:850 11px ui-monospace,monospace;font-style:normal}
+.must b{font-size:13px}.must small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.badge{padding:5px 8px;border-radius:999px;font-size:9px;font-weight:850;white-space:nowrap}
+.badge.must-b{background:var(--green-soft);color:var(--green)}
+.badge.mock{background:var(--orange-soft);color:var(--orange)}
+.badge.out{background:#eef1f5;color:#657187}
+.timeline{display:grid;gap:10px}
+.day{background:#fff;border:1px solid var(--line);border-radius:11px;padding:16px 17px;position:relative;overflow:hidden}
+.day:before{content:'';position:absolute;inset:0 auto 0 0;width:4px;background:var(--blue)}
+.day b{display:block;font-size:14px}.day p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.flow{display:flex;align-items:stretch;gap:24px;overflow-x:auto;padding:4px 2px 18px}
+.flow a{position:relative;min-width:150px;text-decoration:none;border:1px solid var(--line);background:#fff;border-radius:11px;padding:16px 15px;box-shadow:0 4px 14px rgba(19,34,56,.035)}
+.flow a:after{content:'→';position:absolute;right:-18px;top:50%;transform:translateY(-50%);color:#9aa8b9;font-weight:900}
+.flow a:last-child:after{display:none}
+.flow b{display:block;font:850 10px ui-monospace,monospace;color:var(--blue);margin-bottom:5px}
+.flow span{font-size:13px;font-weight:800}.flow small{display:block;margin-top:4px;color:var(--muted);font-size:10px}
+.screen-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:18px}
+.screen-card{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;scroll-margin-top:20px;box-shadow:0 5px 18px rgba(19,34,56,.035)}
+.screen-top{display:flex;align-items:center;gap:12px;padding:16px 17px;background:#fbfcfe;border-bottom:1px solid var(--line)}
+.screen-num{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:var(--blue-soft);color:var(--blue);font:850 11px ui-monospace,monospace}
+.screen-top b{display:block;font-size:14px}.screen-top small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.screen-body{padding:16px 17px}
+.screen-body dl{display:grid;grid-template-columns:76px 1fr;gap:8px 10px;margin:0;font-size:11px}
+.screen-body dt{font-weight:850;color:#41516a}.screen-body dd{margin:0;color:var(--muted)}
+.screen-wire{height:120px;margin-top:14px;border:1px dashed #bdc8d6;border-radius:9px;background:linear-gradient(180deg,#f7f9fc,#fff);padding:12px;display:grid;grid-template-columns:72px 1fr;gap:10px}
+.wire-side{border-radius:5px;background:#e8edf4}.wire-main{display:grid;grid-template-rows:20px 1fr 18px;gap:8px}.wire-line{border-radius:4px;background:#e7edf6}.wire-content{display:grid;grid-template-columns:1fr 1fr;gap:7px}.wire-box{border:1px solid #d9e1eb;border-radius:5px;background:#fff}.wire-action{width:34%;margin-left:auto;border-radius:5px;background:#cbdaf3}
+.role-card{position:relative;padding-top:49px}
+.role-icon{position:absolute;top:18px;left:20px;width:24px;height:24px;border-radius:7px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-weight:900;font-size:11px}
+.raci{overflow-x:auto;border:1px solid var(--line);border-radius:11px;background:#fff;margin-top:18px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:12px}
+th{background:#f2f5f9;color:#40506a;text-align:left;padding:11px 12px;border-bottom:1px solid var(--line)}
+td{padding:11px 12px;border-bottom:1px solid #edf0f4;color:#536176;vertical-align:top}
+tr:last-child td{border-bottom:0}.r{font-weight:850;color:var(--blue)}.a{font-weight:850;color:var(--green)}
+.track{border-left:4px solid var(--blue)}
+.track.green{border-left-color:var(--green)}
+.track.orange{border-left-color:var(--orange)}
+.tech-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.tech-pills span{padding:6px 9px;border-radius:7px;background:#f1f4f8;border:1px solid #dfe5ed;color:#4a596d;font:750 10px ui-monospace,monospace}
+.codebox{background:#111b2d;color:#d8e2f0;border-radius:13px;padding:22px;overflow:auto;box-shadow:var(--shadow)}
+.codebox pre{margin:0;font:12px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;color:#d8e2f0}
+.codebox .folder{color:#83b8ff}.codebox .note{color:#7f91aa}
+.prep-list{display:grid;gap:9px}
+.prep{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+.prep i{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--green-soft);color:var(--green);font-style:normal;font-weight:900}.prep b{display:block;font-size:12px}.prep p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.learning{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.learn-item{display:grid;grid-template-columns:38px 1fr;gap:12px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px}
+.learn-item i{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--orange-soft);color:var(--orange);font:850 11px ui-monospace,monospace;font-style:normal}
+.learn-item b{display:block;font-size:13px}.learn-item p{margin:3px 0 0;color:var(--muted);font-size:11px}
+.warning{display:flex;gap:13px;align-items:flex-start;border:1px solid #f0c986;background:#fff8e9;color:#744f10;border-radius:11px;padding:16px 18px;margin-top:17px}.warning b{display:block;font-size:12px}.warning p{margin:3px 0 0;font-size:11px}
+.footer{max-width:1320px;margin:0 auto;padding:30px 54px 50px;color:#7a8799;font-size:11px}.footer b{color:#526078}
+.mobile-menu{display:none;position:fixed;right:16px;bottom:16px;width:44px;height:44px;border:0;border-radius:50%;background:var(--navy);color:#fff;z-index:30;box-shadow:var(--shadow)}
+@media(max-width:980px){.sidebar{transform:translateX(-100%);transition:.2s}.menu-open .sidebar{transform:translateX(0)}.main{margin-left:0}.mobile-menu{display:block}.section,.hero{padding:54px 24px}.hero-grid,.problem-list,.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:1fr 1fr}.scope-grid,.grid-2,.screen-grid,.learning{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:9px}}
+@media(max-width:600px){h1{font-size:38px}.hero p{font-size:16px}.hero-grid,.problem-list,.grid-3,.grid-4{grid-template-columns:1fr}.one-line{font-size:20px;padding:24px}.must{grid-template-columns:30px 1fr}.badge{display:none}}
+@media print{.sidebar,.mobile-menu,.side-actions{display:none!important}.main{margin:0}.section,.hero{max-width:none;padding:30px 24px;break-inside:auto}.hero{min-height:auto}.card,.screen-card,.day,.learn-item{break-inside:avoid}body{background:#fff}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><strong><i>B</i>BidGen 기획안</strong><small>3일 MVP 실행계획 · 2026-07-07</small></div>
+  <nav class="nav" id="nav">
+    <div class="nav-title">Plan</div>
+    <a href="#overview"><em>00</em>기획 개요</a>
+    <a href="#problem"><em>01</em>문제</a>
+    <a href="#mvp"><em>02</em>개발 목표(MVP)</a>
+    <a href="#screens"><em>03</em>화면</a>
+    <a href="#roles"><em>04</em>역할</a>
+    <a href="#collaboration"><em>05</em>협업 방식</a>
+    <a href="#technology"><em>06</em>사용 기술</a>
+    <a href="#environment"><em>07</em>환경</a>
+    <a href="#learning"><em>08</em>필요한 학습 개념</a>
+  </nav>
+  <div class="side-actions"><button onclick="window.print()">인쇄/PDF</button><button onclick="location.hash='#overview'">맨 위로</button></div>
+</aside>
+<main class="main">
+<section class="section hero" id="overview">
+  <div class="eyebrow">3-Day MVP Product Plan</div>
+  <h1>BidGen<br>원가검증에서 공고문 초안까지</h1>
+  <p>복잡한 전체 시스템을 한 번에 만들지 않고, 3일 동안 실제로 시연 가능한 핵심 흐름을 먼저 구현합니다. 첫 버전은 <b>엑셀 업로드 → 금액·부가세·합계 검증 → 공고 정보 입력 → 공고문 미리보기·출력</b>에 집중합니다.</p>
+  <div class="tags"><span>정적 HTML/CSS/JavaScript</span><span>SheetJS 엑셀 파싱</span><span>규칙 기반 검증</span><span>로컬 데이터 처리</span><span>브라우저 출력</span></div>
+  <div class="hero-grid"><div class="hero-metric"><b>3일</b><span>첫 버전 개발기간</span></div><div class="hero-metric"><b>6개</b><span>MVP 핵심 화면</span></div><div class="hero-metric"><b>2개</b><span>병렬 개발 트랙</span></div><div class="hero-metric"><b>1개</b><span>공통 데이터 스키마</span></div></div>
+</section>
+
+<section class="section" id="problem">
+  <div class="section-head"><div><div class="kicker">01 · PROBLEM</div><h2>문제</h2></div><p>우리 팀이 풀려는 문제를 한 문장으로 고정하여 기능이 과도하게 확장되는 것을 막습니다.</p></div>
+  <div class="one-line">기존 원가계산서와 입찰공고문을 <mark>복사·수정</mark>하는 과정에서 발생하는 금액·수식·부가세·날짜·법령 누락을, <mark>업로드 후 자동 검증과 공고문 초안 생성</mark>으로 줄인다.</div>
+  <div class="problem-list">
+    <article class="problem-item"><b>수식·합계 오류</b><p>기존 엑셀의 행·열을 수정하면서 셀 참조가 깨지고 총액이 달라집니다.</p></article>
+    <article class="problem-item"><b>부가세·제비율 오류</b><p>포함/별도 판단과 최신 제비율 확인을 사람이 반복합니다.</p></article>
+    <article class="problem-item"><b>날짜 수정 누락</b><p>공고문 여러 위치의 날짜를 각각 고치다가 일부가 과거 값으로 남습니다.</p></article>
+    <article class="problem-item"><b>검토 근거 부족</b><p>왜 경고가 발생했고 어떤 기준을 적용했는지 확인하기 어렵습니다.</p></article>
+  </div>
+</section>
+
+<section class="section" id="mvp">
+  <div class="section-head"><div><div class="kicker">02 · DEVELOPMENT GOAL</div><h2>개발 목표(MVP)</h2></div><p>3일 안에 완성 가능한 범위를 기준으로, 실시간 외부 연동보다 핵심 업무 흐름의 작동 여부를 먼저 검증합니다.</p></div>
+  <div class="scope-grid">
+    <div class="must-list">
+      <div class="must"><i>01</i><div><b>원가계산서 엑셀 업로드</b><small>.xlsx 파일의 첫 번째 시트와 주요 헤더를 읽어 화면에 표시</small></div><span class="badge must-b">구현</span></div>
+      <div class="must"><i>02</i><div><b>표준 항목 매핑·수정</b><small>공사명, 항목명, 수량, 단가, 금액 열을 자동 인식하고 실패 시 직접 지정</small></div><span class="badge must-b">구현</span></div>
+      <div class="must"><i>03</i><div><b>핵심 계산 검증</b><small>수량×단가, 소계, 부가세, 총계를 다시 계산해 차이를 표시</small></div><span class="badge must-b">구현</span></div>
+      <div class="must"><i>04</i><div><b>제비율·법령 체크</b><small>샘플 기준정보 JSON을 이용해 일치·누락 여부와 적용 근거 표시</small></div><span class="badge mock">샘플 데이터</span></div>
+      <div class="must"><i>05</i><div><b>A→B 데이터 전달</b><small>검증 완료 데이터를 브라우저 메모리 또는 JSON으로 공고문 화면에 전달</small></div><span class="badge must-b">구현</span></div>
+      <div class="must"><i>06</i><div><b>공고 일정·문구 자동 반영</b><small>공고일, 마감일, 개찰일, 금액을 한 번 입력해 미리보기에 반복 반영</small></div><span class="badge must-b">구현</span></div>
+      <div class="must"><i>07</i><div><b>미리보기·내보내기</b><small>HTML 미리보기, JSON 저장, 브라우저 인쇄/PDF 출력 제공</small></div><span class="badge must-b">구현</span></div>
+    </div>
+    <div>
+      <div class="timeline">
+        <article class="day"><b>1일차 · 데이터 입력 기반</b><p>프로젝트 골격, 엑셀 업로드, 헤더 매핑, 표준 데이터 스키마, 원가 항목 테이블.</p></article>
+        <article class="day"><b>2일차 · 검증과 화면 연결</b><p>재계산, 합계·부가세 경고, 샘플 제비율·법령 규칙, 검증결과 화면, A→B 전달.</p></article>
+        <article class="day"><b>3일차 · 공고문과 시연 완성</b><p>날짜 논리 검증, 공고문 미리보기, JSON·PDF 출력, 오류 수정, 샘플 시나리오 리허설.</p></article>
+      </div>
+      <div class="warning"><div>⚠</div><div><b>3일 MVP에서 제외</b><p>실시간 조달청 API, 실제 AI API, OCR, HWP 자동생성, 사용자 권한·결재, 서버 DB, 사내망 연동은 후속 버전으로 넘깁니다. 화면에서는 ‘연동 예정’ 또는 샘플 추천 결과로만 표현합니다.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="screens">
+  <div class="section-head"><div><div class="kicker">03 · SCREENS & NAVIGATION</div><h2>화면</h2></div><p>사용자는 6개 화면을 순서대로 이동합니다. 검증 오류가 있으면 다음 단계로 넘어가지 않고 해당 화면에서 바로 수정합니다.</p></div>
+  <div class="flow">
+    <a href="#screen-1"><b>SCREEN 01</b><span>시작·업로드</span><small>파일 선택</small></a>
+    <a href="#screen-2"><b>SCREEN 02</b><span>매핑·데이터 확인</span><small>열 지정</small></a>
+    <a href="#screen-3"><b>SCREEN 03</b><span>검증결과</span><small>오류 수정</small></a>
+    <a href="#screen-4"><b>SCREEN 04</b><span>공고정보 입력</span><small>날짜·조건</small></a>
+    <a href="#screen-5"><b>SCREEN 05</b><span>법령 검토</span><small>추천 확인</small></a>
+    <a href="#screen-6"><b>SCREEN 06</b><span>미리보기·출력</span><small>PDF·JSON</small></a>
+  </div>
+  <div class="screen-grid">
+    <article class="screen-card" id="screen-1"><div class="screen-top"><span class="screen-num">01</span><div><b>시작·원가계산서 업로드</b><small>프로젝트 생성과 .xlsx 파일 선택</small></div></div><div class="screen-body"><dl><dt>핵심 요소</dt><dd>공사/구매 유형, 파일 드래그 영역, 샘플 파일 불러오기</dd><dt>다음 조건</dt><dd>지원 형식과 파일 크기 확인 후 매핑 화면으로 이동</dd><dt>예외 처리</dt><dd>형식 오류, 빈 시트, 암호화 파일 안내</dd></dl><div class="screen-wire"><div class="wire-side"></div><div class="wire-main"><div class="wire-line"></div><div class="wire-content"><div class="wire-box"></div><div class="wire-box"></div></div><div class="wire-action"></div></div></div></div></article>
+    <article class="screen-card" id="screen-2"><div class="screen-top"><span class="screen-num">02</span><div><b>매핑·데이터 확인</b><small>업로드 열과 표준 필드를 연결</small></div></div><div class="screen-body"><dl><dt>핵심 요소</dt><dd>시트 선택, 헤더 행 선택, 항목명·수량·단가·금액 드롭다운</dd><dt>다음 조건</dt><dd>필수 필드가 모두 매핑되어야 검증 시작 가능</dd><dt>사용자 행동</dt><dd>자동 인식 결과를 확인하고 오인식 항목만 수정</dd></dl><div class="screen-wire"><div class="wire-side"></div><div class="wire-main"><div class="wire-line"></div><div class="wire-content"><div class="wire-box"></div><div class="wire-box"></div></div><div class="wire-action"></div></div></div></div></article>
+    <article class="screen-card" id="screen-3"><div class="screen-top"><span class="screen-num">03</span><div><b>원가 검증결과</b><small>재계산·부가세·제비율·법령 경고</small></div></div><div class="screen-body"><dl><dt>핵심 요소</dt><dd>항목 테이블, 차액, 통과/경고/오류 상태, 기준정보 버전</dd><dt>다음 조건</dt><dd>합계 불일치와 부가세 미선택 오류를 해소해야 공고문 단계 이동</dd><dt>처리 방식</dt><dd>오류 행을 직접 수정하면 전체 금액을 즉시 재계산</dd></dl><div class="screen-wire"><div class="wire-side"></div><div class="wire-main"><div class="wire-line"></div><div class="wire-content"><div class="wire-box"></div><div class="wire-box"></div></div><div class="wire-action"></div></div></div></div></article>
+    <article class="screen-card" id="screen-4"><div class="screen-top"><span class="screen-num">04</span><div><b>공고정보 입력</b><small>기본정보·일정·입찰조건 입력</small></div></div><div class="screen-body"><dl><dt>핵심 요소</dt><dd>공고명, 공고일, 마감일, 개찰일, 계약기간, 계약방법</dd><dt>검증 규칙</dt><dd>공고일 &lt; 마감일 ≤ 개찰일, 필수 날짜 누락 금지</dd><dt>자동 처리</dt><dd>원가검증에서 확정된 공사명과 총액 자동 채움</dd></dl><div class="screen-wire"><div class="wire-side"></div><div class="wire-main"><div class="wire-line"></div><div class="wire-content"><div class="wire-box"></div><div class="wire-box"></div></div><div class="wire-action"></div></div></div></div></article>
+    <article class="screen-card" id="screen-5"><div class="screen-top"><span class="screen-num">05</span><div><b>법령·필수조항 검토</b><small>규칙 기반 추천 결과 확인</small></div></div><div class="screen-body"><dl><dt>핵심 요소</dt><dd>필수 법령, 추천 근거, 적용/제외 체크, 담당자 메모</dd><dt>MVP 방식</dt><dd>laws.json의 공사유형·금액구간 규칙으로 샘플 추천</dd><dt>후속 확장</dt><dd>조달청 유사사례와 AI 추천 API를 동일 영역에 연결</dd></dl><div class="screen-wire"><div class="wire-side"></div><div class="wire-main"><div class="wire-line"></div><div class="wire-content"><div class="wire-box"></div><div class="wire-box"></div></div><div class="wire-action"></div></div></div></div></article>
+    <article class="screen-card" id="screen-6"><div class="screen-top"><span class="screen-num">06</span><div><b>공고문 미리보기·내보내기</b><small>최종값 확인과 결과 저장</small></div></div><div class="screen-body"><dl><dt>핵심 요소</dt><dd>문서형 미리보기, 자동채움 강조, 검증 체크리스트</dd><dt>출력</dt><dd>브라우저 인쇄/PDF, 데이터 JSON, 검증 결과 CSV 또는 엑셀</dd><dt>차단 조건</dt><dd>총액 오류, 날짜 오류, 필수 법령 미검토 시 출력 버튼 비활성화</dd></dl><div class="screen-wire"><div class="wire-side"></div><div class="wire-main"><div class="wire-line"></div><div class="wire-content"><div class="wire-box"></div><div class="wire-box"></div></div><div class="wire-action"></div></div></div></div></article>
+  </div>
+</section>
+
+<section class="section" id="roles">
+  <div class="section-head"><div><div class="kicker">04 · ROLES</div><h2>역할</h2></div><p>4명 기준 역할안입니다. 인원이 적으면 기획·QA와 개발 역할을 겸임하되, 데이터 스키마와 최종 검증 책임자는 분리합니다.</p></div>
+  <div class="grid-4">
+    <article class="card role-card"><span class="role-icon">PO</span><h3>기획·업무 담당</h3><p>문제 정의, 화면 우선순위, 샘플 원가계산서·공고문 제공, 기준정보와 합격 기준 확정.</p></article>
+    <article class="card role-card"><span class="role-icon">A</span><h3>도구 A 개발</h3><p>엑셀 파싱, 매핑, 원가 재계산, 부가세·합계·제비율 검증, 검증 데이터 생성.</p></article>
+    <article class="card role-card"><span class="role-icon">B</span><h3>도구 B 개발</h3><p>공고정보 폼, 날짜 검증, 법령 체크, 문서 미리보기, PDF·JSON 내보내기.</p></article>
+    <article class="card role-card"><span class="role-icon">QA</span><h3>통합·QA·발표</h3><p>A→B 연계, 샘플 테스트, 오류 목록 관리, 배포, 시연 시나리오와 발표자료 정리.</p></article>
+  </div>
+  <div class="raci"><table><thead><tr><th>업무</th><th>기획·업무</th><th>도구 A</th><th>도구 B</th><th>통합·QA</th></tr></thead><tbody>
+    <tr><td>요구사항·범위 확정</td><td class="a">A/R</td><td>C</td><td>C</td><td>C</td></tr>
+    <tr><td>표준 데이터 스키마</td><td>A</td><td class="r">R</td><td class="r">R</td><td>C</td></tr>
+    <tr><td>엑셀 파싱·검증</td><td>C</td><td class="a">A/R</td><td>I</td><td>C</td></tr>
+    <tr><td>공고문 생성·출력</td><td>C</td><td>I</td><td class="a">A/R</td><td>C</td></tr>
+    <tr><td>통합테스트·배포</td><td>C</td><td>R</td><td>R</td><td class="a">A/R</td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="section" id="collaboration">
+  <div class="section-head"><div><div class="kicker">05 · COLLABORATION</div><h2>협업 방식</h2></div><p>도구 A와 도구 B를 병렬로 만들되, 첫날 오전에 공통 데이터 구조를 먼저 확정해야 마지막 날 통합 실패를 줄일 수 있습니다.</p></div>
+  <div class="grid-3">
+    <article class="card track"><div class="no">TRACK A</div><h3>원가 업로드·검증</h3><p>엑셀 파일을 표준 JSON으로 변환하고 금액 오류를 판정합니다.</p><ul><li>입력: 원가계산서 .xlsx</li><li>출력: validatedProject 객체</li><li>완료 기준: 샘플 정상·오류 파일 처리</li></ul></article>
+    <article class="card track green"><div class="no">TRACK B</div><h3>공고문 생성·출력</h3><p>고정된 샘플 JSON으로 먼저 개발한 뒤 도구 A 결과를 연결합니다.</p><ul><li>입력: validatedProject 객체</li><li>출력: 공고문 HTML·JSON·PDF</li><li>완료 기준: 날짜 검증과 미리보기</li></ul></article>
+    <article class="card track orange"><div class="no">INTEGRATION</div><h3>공통·QA</h3><p>데이터 스키마, 공통 UI, 샘플, 테스트 목록과 배포를 관리합니다.</p><ul><li>매일 2회 10분 통합 점검</li><li>오류는 GitHub Issue로 즉시 기록</li><li>3일차 오전부터 기능 동결</li></ul></article>
+  </div>
+  <div class="grid-2" style="margin-top:17px">
+    <article class="card"><div class="no">WORK RULE</div><h3>작업 규칙</h3><ul><li><b>main</b>: 시연 가능한 상태만 병합</li><li><b>feature/excel</b>, <b>feature/notice</b>: 기능별 브랜치</li><li>작은 단위로 커밋하고 Pull Request에 화면 캡처 첨부</li><li>공통 객체 필드 변경은 팀 전체 합의 후 반영</li></ul></article>
+    <article class="card"><div class="no">CHECK POINT</div><h3>하루 운영</h3><ul><li>09:30: 오늘 완료할 기능과 막힌 점 공유</li><li>15:00: A/B 데이터 연결 상태 점검</li><li>종료 전: main 배포 및 샘플 시나리오 1회 실행</li><li>3일차: 신규 기능보다 오류 제거와 발표 완성 우선</li></ul></article>
+  </div>
+</section>
+
+<section class="section" id="technology">
+  <div class="section-head"><div><div class="kicker">06 · TECHNOLOGY</div><h2>사용 기술</h2></div><p>설치와 빌드 부담을 줄이기 위해 브라우저 중심으로 구성합니다. 외부 API는 첫 버전에서 실제 호출하지 않고 연결 지점만 분리합니다.</p></div>
+  <div class="grid-3">
+    <article class="card"><div class="no">FRONTEND</div><h3>HTML · CSS · JavaScript</h3><p>화면, 상태 전환, 폼 검증, 계산 로직을 순수 JavaScript로 구현합니다.</p><div class="tech-pills"><span>ES Modules</span><span>DOM API</span><span>File API</span><span>localStorage</span></div></article>
+    <article class="card"><div class="no">FILE & EXPORT</div><h3>SheetJS · Browser Print</h3><p>SheetJS로 엑셀을 읽고, 최종 문서는 HTML 미리보기와 브라우저 PDF 출력으로 제공합니다.</p><div class="tech-pills"><span>xlsx</span><span>JSON</span><span>CSV</span><span>window.print()</span></div></article>
+    <article class="card"><div class="no">DEPLOY & COLLAB</div><h3>GitHub · Vercel</h3><p>기능 브랜치와 Pull Request로 협업하고 정적 사이트를 Vercel 또는 GitHub Pages에 배포합니다.</p><div class="tech-pills"><span>Git</span><span>GitHub Issues</span><span>Vercel</span><span>Chrome</span></div></article>
+  </div>
+  <div class="warning"><div>→</div><div><b>후속 연동 지점</b><p><code>services/procurement-api.js</code>와 <code>services/ai-recommendation.js</code>를 빈 인터페이스로 두어, Phase 2에서 서버리스 프록시를 거쳐 조달청·AI API를 연결할 수 있도록 합니다.</p></div></div>
+</section>
+
+<section class="section" id="environment">
+  <div class="section-head"><div><div class="kicker">07 · ENVIRONMENT</div><h2>환경</h2></div><p>팀원이 동시에 수정해도 충돌이 적도록 화면, 데이터, 기능 모듈을 분리합니다. 최종 시연본은 정적 사이트로 배포합니다.</p></div>
+  <div class="grid-2">
+    <div class="codebox"><pre><span class="folder">bidgen-mvp/</span>
+├─ index.html                 <span class="note"># 시작·업로드</span>
+├─ notice.html                <span class="note"># 공고문 작성</span>
+├─ assets/
+│  ├─ css/style.css           <span class="note"># 공통 디자인</span>
+│  └─ js/
+│     ├─ app.js               <span class="note"># 화면 상태·이동</span>
+│     ├─ excel-parser.js      <span class="note"># SheetJS 파싱</span>
+│     ├─ mapper.js            <span class="note"># 열 매핑</span>
+│     ├─ validator.js         <span class="note"># 금액·날짜 검증</span>
+│     ├─ notice-generator.js  <span class="note"># 문서 생성</span>
+│     └─ storage.js           <span class="note"># JSON·로컬 저장</span>
+├─ data/
+│  ├─ rates.json              <span class="note"># 샘플 제비율</span>
+│  ├─ laws.json               <span class="note"># 샘플 법령 규칙</span>
+│  └─ notice-template.json    <span class="note"># 공고문 문구</span>
+├─ samples/
+│  ├─ normal.xlsx
+│  └─ error.xlsx
+├─ services/
+│  ├─ procurement-api.js      <span class="note"># 후속 연동 인터페이스</span>
+│  └─ ai-recommendation.js    <span class="note"># 후속 연동 인터페이스</span>
+└─ README.md                  <span class="note"># 실행·역할·테스트 방법</span></pre></div>
+    <div class="prep-list">
+      <div class="prep"><i>1</i><div><b>개발 도구</b><p>Chrome 최신버전, VS Code 또는 Claude Code, Git, GitHub 저장소.</p></div></div>
+      <div class="prep"><i>2</i><div><b>필수 자료</b><p>정상 원가계산서 1건, 오류 삽입 원가계산서 1건, 표준 공고문 예시 1건.</p></div></div>
+      <div class="prep"><i>3</i><div><b>기준 데이터</b><p>시연용 제비율 JSON, 공사유형·금액구간별 법령 규칙, 날짜 검증 기준.</p></div></div>
+      <div class="prep"><i>4</i><div><b>실행 방법</b><p>로컬 정적 서버(<code>npx serve</code> 또는 VS Code Live Server)에서 실행. 파일을 직접 열 때의 모듈·CORS 문제를 방지합니다.</p></div></div>
+      <div class="prep"><i>5</i><div><b>시연 시나리오</b><p>오류 파일 업로드 → 차액 탐지 → 수정 → 통과 → 공고 날짜 입력 → PDF 출력 순으로 고정합니다.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="learning">
+  <div class="section-head"><div><div class="kicker">08 · LEARNING CONCEPTS</div><h2>필요한 학습 개념</h2></div><p>모든 개념을 깊게 공부한 뒤 시작하기보다, 구현에 필요한 순서로 바로 적용하면서 익히는 방식이 적합합니다.</p></div>
+  <div class="learning">
+    <div class="learn-item"><i>01</i><div><b>브라우저 DOM과 이벤트</b><p>버튼 클릭, 파일 선택, 폼 변경, 화면 전환과 오류 메시지 표시.</p></div></div>
+    <div class="learn-item"><i>02</i><div><b>JavaScript 객체·배열</b><p>엑셀 행을 표준 객체로 변환하고 map, filter, reduce로 계산.</p></div></div>
+    <div class="learn-item"><i>03</i><div><b>File API와 SheetJS</b><p>사용자가 선택한 엑셀을 ArrayBuffer로 읽고 시트 데이터를 JSON으로 변환.</p></div></div>
+    <div class="learn-item"><i>04</i><div><b>데이터 스키마와 매핑</b><p>서로 다른 열 이름을 itemName, quantity, unitPrice 등 공통 필드로 통일.</p></div></div>
+    <div class="learn-item"><i>05</i><div><b>규칙 기반 검증</b><p>합계 차액, 부가세 선택, 날짜 선후관계, 필수 법령 누락을 조건문으로 판정.</p></div></div>
+    <div class="learn-item"><i>06</i><div><b>상태 관리와 로컬 저장</b><p>현재 단계, 검증 상태, 사용자 수정값을 하나의 상태 객체와 localStorage로 관리.</p></div></div>
+    <div class="learn-item"><i>07</i><div><b>문서 템플릿 생성</b><p>데이터를 HTML 문서의 반복 위치에 안전하게 삽입하고 인쇄용 CSS를 구성.</p></div></div>
+    <div class="learn-item"><i>08</i><div><b>Git 브랜치와 병합</b><p>기능별 브랜치, 작은 커밋, Pull Request, 충돌 해결과 배포 흐름.</p></div></div>
+    <div class="learn-item"><i>09</i><div><b>API·비동기 처리 기초</b><p>후속 버전의 fetch, async/await, 오류 처리, CORS와 서버리스 프록시 개념.</p></div></div>
+    <div class="learn-item"><i>10</i><div><b>보안·감사 추적</b><p>민감정보 최소화, API 키 비노출, 사용자 수정·판단 이력 기록의 필요성.</p></div></div>
+  </div>
+  <div class="warning"><div>✓</div><div><b>학습 우선순위</b><p>1일차에는 DOM·객체·SheetJS·스키마, 2일차에는 검증 규칙·상태관리, 3일차에는 문서 출력·Git 통합·API 확장 개념 순으로 학습합니다.</p></div></div>
+</section>
+
+<footer class="footer"><b>BidGen 3일 MVP HTML 기획안</b><br>근거: BidGen PRD v1.6 및 화면 구성 자료 · 수정 기준일 2026-07-07</footer>
+</main>
+<button class="mobile-menu" onclick="document.body.classList.toggle('menu-open')">☰</button>
+<script>
+const links=[...document.querySelectorAll('#nav a')];
+const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-25% 0px -68% 0px'});
+targets.forEach(t=>observer.observe(t));
+links.forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('menu-open')));
+</script>
+</body>
+</html>
