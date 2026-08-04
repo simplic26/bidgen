@@ -1457,3 +1457,117 @@ blockquote {
 .rate-table tbody tr:nth-child(even) {
   background: #f7fafc;
 }
+
+
+.tree-table-wrap {
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.tree-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tree-table th,
+.tree-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e7edf2;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tree-table td:nth-child(1) {
+  white-space: normal;
+}
+
+.tree-table th {
+  color: #617080;
+  background: #f3f6f9;
+  font-weight: 800;
+}
+
+.tree-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.tree-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tree-row-warn {
+  background: #fdf6e8;
+}
+
+/* 산출근거 breakdown 라인이 뒤따르는 항목 행 — 표 시각적으로 한 블록으로 묶기 위해 자기 자신의
+   아래쪽 경계선을 지운다(경계는 breakdown 라인이 대신 그린다). */
+.tree-row-has-calc td {
+  border-bottom: 0;
+}
+
+.tree-calc-line {
+  padding-top: 0;
+  padding-bottom: 8px;
+  color: #8a97a6;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  white-space: normal;
+}
+
+.tree-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tree-badge-ok {
+  color: #247a52;
+  background: #e5f5ec;
+  border: 1px solid #bfe3cf;
+}
+
+.tree-badge-inferred {
+  color: #1d5f8f;
+  background: #ecf5fb;
+  border: 1px solid #b9d6e9;
+}
+
+.tree-badge-warn {
+  color: #a65f00;
+  background: #fdf3d7;
+  border: 1px solid #ecd9a0;
+}
+
+.tree-badge-unresolved {
+  color: #55636f;
+  background: #eef2f5;
+  border: 1px solid #d8e0e7;
+}
+
+.tree-issues,
+.tree-note,
+.tree-source,
+.tree-empty {
+  color: #617080;
+  font-size: 13px;
+}
+
+/* 트리 결과가 검증에 쓰이지 않을 때(레거시 스캔 폴백) 띄우는 경고 — tree-badge-warn과 같은 색계열 */
+.tree-fallback-warning {
+  padding: 10px 14px;
+  color: #a65f00;
+  background: #fdf3d7;
+  border: 1px solid #ecd9a0;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.tree-note {
+  font-size: 12px;
+}

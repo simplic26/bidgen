@@ -24,6 +24,7 @@ import { irSheetToRecognition } from './utils/excel';
 import { buildReferenceRows, normalizeCostStatement, parseRate, runValidation } from './utils/validation';
 import { annotateRows, buildNormalizedRows } from './utils/normalize';
 import { buildNoticePrefill } from './utils/notice';
+import { parseCostTree } from './utils/costTree';
 
 type Step = 'upload' | 'recognition' | 'progress' | 'dashboard' | 'detail' | 'notice';
 
@@ -87,6 +88,9 @@ export default function App({ initialStep = 'upload' }: AppProps) {
   }, [workbookIR]);
 
   const referenceRows = useMemo<ReferenceRate[]>(() => (workbookIR ? buildReferenceRows(workbookIR) : []), [workbookIR]);
+
+  // 파싱 확인용 원가 트리 — 인식 화면에서 검증 실행 전 육안 확인
+  const costTree = useMemo(() => (workbookIR ? parseCostTree(workbookIR) : null), [workbookIR]);
 
   // 공고문 생성 화면 자동 채움: 업로드된 원가계산서에서 총액·파일명·발주유형 유도
   const noticePrefill = useMemo(
@@ -207,6 +211,7 @@ export default function App({ initialStep = 'upload' }: AppProps) {
         laborRates={laborRates}
         summary={summary}
         workbookIR={workbookIR}
+        costTree={costTree}
       />
     );
   }

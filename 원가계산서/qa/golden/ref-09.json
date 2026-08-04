@@ -1,0 +1,118 @@
+{
+  "sourceSha256": "f534292f2d114c2d7861c28d9416f56843b480c9aae05cfdcc33cda95ed6d3e5",
+  "summarySheet": "원가계산서",
+  "items": [
+    {
+      "canonical": "부가가치세",
+      "amount": 32809000,
+      "rate": null
+    },
+    {
+      "canonical": "부가가치세",
+      "amount": 32809000,
+      "rate": 0.1
+    },
+    {
+      "canonical": "간접노무비",
+      "amount": 15306306,
+      "rate": 0.15
+    },
+    {
+      "canonical": "환경보전비",
+      "amount": 714414,
+      "rate": 0.003
+    },
+    {
+      "canonical": "간접노무비",
+      "amount": 15306306,
+      "rate": null
+    },
+    {
+      "canonical": "산재보험료",
+      "amount": 4177601,
+      "rate": null
+    },
+    {
+      "canonical": "산재보험료",
+      "amount": 4177601,
+      "rate": 0.0356
+    },
+    {
+      "canonical": "고용보험료",
+      "amount": 1185218,
+      "rate": null
+    },
+    {
+      "canonical": "고용보험료",
+      "amount": 1185218,
+      "rate": 0.0101
+    },
+    {
+      "canonical": "국민건강보험료",
+      "amount": 0,
+      "rate": null
+    },
+    {
+      "canonical": "국민연금보험료",
+      "amount": 0,
+      "rate": null
+    },
+    {
+      "canonical": "퇴직공제부금비",
+      "amount": 2346967,
+      "rate": null
+    },
+    {
+      "canonical": "퇴직공제부금비",
+      "amount": 2346967,
+      "rate": 0.023
+    },
+    {
+      "canonical": "산업안전보건관리비",
+      "amount": 7406097.4602,
+      "rate": null
+    },
+    {
+      "canonical": "산업안전보건관리비",
+      "amount": 7406097.4602,
+      "rate": 0.0311
+    },
+    {
+      "canonical": "기타경비",
+      "amount": 11212384,
+      "rate": null
+    },
+    {
+      "canonical": "기타경비",
+      "amount": 11212384,
+      "rate": 0.04424
+    },
+    {
+      "canonical": "환경보전비",
+      "amount": 714414,
+      "rate": null
+    },
+    {
+      "canonical": "일반관리비",
+      "amount": 22438973,
+      "rate": null
+    },
+    {
+      "canonical": "일반관리비",
+      "amount": 22438973,
+      "rate": 0.08
+    },
+    {
+      "canonical": "이윤",
+      "amount": 25024500,
+      "rate": null
+    },
+    {
+      "canonical": "이윤",
+      "amount": 25024500,
+      "rate": 0.15
+    }
+  ],
+  "confirmed": true,
+  "note": "원본 '원가계산서' 시트(C열=라벨, D열=합계 formula(=SUM(E:E)), E열=산출값, F/G/H열=산출근거는 D/E열보다 뒤에 위치)와 22개 항목 전부 대조 완료 — 값 전부 정확, 수정 없음. 각 canonical이 2번씩 나오는 건 오탐이 아니라 이 시트 구조상 자연스러운 중복: D열(부모, 단순 SUM(E:E) 참조라 rate 없음)과 E열(자식, 실제 수식이라 rate 있음)이 같은 금액을 가리키는 별개 셀이라 costTreeToDetectedItems가 amountCell 기준으로 둘 다 살린다. 국민건강보험료·국민연금보험료는 원본에 금액 0으로 존재(1개월미만 미적용)이라 amount:0으로 정확히 포함됨. 노인장기요양보험료는 원본 자체에 금액 셀이 없어(공란) 제외가 맞음. 이 파일의 라벨-금액 인접 구조(F/G/H가 금액열보다 오른쪽)가 다른 파일들에서 발견된 '설명문 오매칭' 버그를 피해간 이유로 보임. [최종리뷰 2026-08-04] rate가 비어 있던 12개 항목(= D열 부모 셀 쪽)에 `\"rate\": null`을 **명시**했다(= 파서가 요율을 만들어내면 FAIL). 근거: raw 셀 확인 결과 D열 셀은 전부 =SUM(Ex:Ex) 형태의 단순 재참조 수식이어서(D9=SUM(E9:E9), D12=SUM(E12:E12), D28=SUM(E28:E28) …) 그 셀 자체의 관계에는 요율이 없다 — 요율(H열)은 E열 산출 수식(예: E12=INT(E10*H12))의 근거이고 그쪽 항목은 이미 rate를 명시해 두었다. 금액 0인 국민건강보험료(D14)·국민연금보험료(D15)도 포함했다: E14/E15는 아예 공란이고 K14/K15에 '1개월미만공사 미적용'이라 적혀 있어 이 두 행에는 검증 가능한 요율 관계가 없다(H14=3.545%, H15=4.5%는 미적용 표시값). 금액 0 행은 matchesWithRounding의 천단위 절사 창이 넓으면 아무 base×rate나 0에 맞아 요율이 발명되기 쉬운 자리라, 이 명시가 그 회귀를 잡는 가드다."
+}
