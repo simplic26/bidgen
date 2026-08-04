@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원가계산서 자동검증 - 현황과 개선안</title>
+<style>
+:root{
+  --ink:#2C2C2A; --ink2:#5F5E5A; --ink3:#888780; --line:#D3D1C7; --paper:#FFFFFF; --panel:#F7F6F2;
+  --ok-bg:#E1F5EE; --ok-tx:#0F6E56; --ok-hd:#085041;
+  --half-bg:#FAEEDA; --half-tx:#854F0B; --half-hd:#633806;
+  --no-bg:#FCEBEB; --no-tx:#A32D2D; --no-hd:#791F1F;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink)}
+body{font-family:"Malgun Gothic","Apple SD Gothic Neo","Segoe UI",sans-serif;font-size:15px;line-height:1.75}
+.wrap{max-width:1000px;margin:0 auto;padding:40px 28px 80px}
+h1{font-size:26px;font-weight:600;margin:0 0 8px}
+h2{font-size:20px;font-weight:600;margin:48px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+h3{font-size:16px;font-weight:600;margin:26px 0 10px}
+.lead{color:var(--ink2);margin:0 0 4px}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+.pill{font-size:13px;padding:4px 12px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok-hd)}
+.pill.half{background:var(--half-bg);color:var(--half-hd)}
+.pill.no{background:var(--no-bg);color:var(--no-hd)}
+.pill.n{background:var(--panel);color:var(--ink2)}
+nav{margin:24px 0 0;font-size:14px}
+nav a{color:var(--ink2);text-decoration:none;margin-right:16px;border-bottom:1px solid var(--line)}
+nav a:hover{color:var(--ink)}
+.card{border-radius:12px;padding:18px 22px 20px;margin:0 0 14px}
+.card .hd{display:flex;align-items:baseline;gap:10px;margin:0 0 10px;white-space:nowrap}
+.card .hd strong{font-size:17px;font-weight:600}
+.card .hd em{font-style:normal;font-size:22px;font-weight:600}
+.card ul{margin:0;padding:0;list-style:none}
+.card li{font-size:15px;line-height:1.95}
+.card.ok{background:var(--ok-bg)} .card.ok .hd strong,.card.ok .hd em{color:var(--ok-hd)} .card.ok li{color:var(--ok-tx)}
+.card.half{background:var(--half-bg)} .card.half .hd strong,.card.half .hd em{color:var(--half-hd)} .card.half li{color:var(--half-tx)}
+.card.no{background:var(--no-bg)} .card.no .hd strong,.card.no .hd em{color:var(--no-hd)} .card.no li{color:var(--no-tx)}
+.oneline{background:var(--panel);border-radius:12px;padding:16px 22px;margin:0}
+.oneline b{font-weight:600}
+.status-overview{margin:24px 0 0;border:1px solid var(--line);border-radius:16px;padding:22px;background:var(--panel)}
+.status-overview .status-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
+.status-overview .eyebrow{display:block;color:var(--ink3);font-size:12px;font-weight:600;letter-spacing:.08em;margin-bottom:3px}
+.status-overview h2{border:0;padding:0;margin:0;font-size:21px}
+.status-overview .asof{font-size:12.5px;color:var(--ink3);margin:0;white-space:nowrap}
+.status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.status-panel{border:1px solid var(--line);border-radius:12px;padding:17px 18px;background:#fff}
+.status-panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.status-panel-head strong{font-size:16px}
+.status-panel-head span{font-size:12.5px;color:var(--ink3)}
+.status-track{display:flex;height:9px;overflow:hidden;border-radius:999px;background:#E8E6DF;margin-bottom:12px}
+.status-track .ok{background:var(--ok-tx)}
+.status-track .half{background:var(--half-tx)}
+.status-track .no{background:var(--no-tx)}
+.status-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.status-count{border-radius:8px;padding:8px 9px;font-size:12.5px;line-height:1.35}
+.status-count b{display:block;font-size:18px;margin-bottom:2px}
+.status-count.ok{background:var(--ok-bg);color:var(--ok-hd)}
+.status-count.half{background:var(--half-bg);color:var(--half-hd)}
+.status-count.no{background:var(--no-bg);color:var(--no-hd)}
+.status-panel-note{font-size:12.5px;color:var(--ink2);margin:11px 0 0}
+.figure{overflow-x:auto;margin:0;padding:0 0 6px}
+.figure svg{display:block;min-width:1100px;width:100%;height:auto}
+figcaption{font-size:13px;color:var(--ink3);margin-top:8px}
+.progress{font-size:14px;color:var(--ink2);margin:0 0 18px}
+.progress b{font-weight:600;color:var(--ink)}
+.check-intro{margin:0 0 16px;color:var(--ink2)}
+.check-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.check-summary-card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--panel)}
+.check-summary-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.check-summary-head strong{font-size:16px}
+.check-summary-head b{font-size:20px;font-weight:600}
+.check-summary-head b span{color:var(--ok-hd)}
+.check-progress-bar{height:7px;border-radius:999px;overflow:hidden;background:#E5E3DC;margin:11px 0 8px}
+.check-progress-bar span{display:block;width:0;height:100%;background:var(--ok-tx);transition:width .2s ease}
+.check-summary-card p{font-size:12.5px;color:var(--ink3);margin:0}
+.check-tracks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.check-track{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.check-track.validation{border-top:4px solid #315F7D}
+.check-track.notice{border-top:4px solid var(--half-tx)}
+.check-track-head{padding:16px 18px;background:var(--panel)}
+.check-track-head strong{display:block;font-size:16px;margin-bottom:2px}
+.check-track-head span{font-size:12.5px;color:var(--ink3)}
+.check-group{border-top:1px solid var(--line)}
+.check-group summary{display:grid;grid-template-columns:46px minmax(0,1fr) auto 18px;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;list-style:none}
+.check-group summary::-webkit-details-marker{display:none}
+.check-group summary:hover{background:#FAF9F6}
+.group-priority{font-size:11px;font-weight:600;color:var(--ink2);letter-spacing:.03em}
+.group-title{font-size:14px;font-weight:600;line-height:1.4}
+.group-title small{display:block;font-size:12px;font-weight:400;color:var(--ink3);margin-top:2px}
+.group-progress{font-size:12.5px;color:var(--ink3);white-space:nowrap}
+.group-progress b{color:var(--ink);font-weight:600}
+.group-chevron{width:16px;height:16px;color:var(--ink3);transition:transform .18s ease}
+.check-group[open] .group-chevron{transform:rotate(180deg)}
+.group-items{padding:0 16px 10px;background:#fff}
+.group-items .item{padding:10px 0}
+.group-items .item .t{font-size:14px;line-height:1.55}
+.group-items .item .src{font-size:11.5px}
+.group-items .item .why{font-size:12px}
+.group{border:1px solid var(--line);border-radius:12px;padding:6px 20px 14px;margin:0 0 14px}
+.group>h3{margin:14px 0 6px}
+.group>h3 span{font-weight:400;color:var(--ink3);font-size:14px;margin-left:6px}
+.item{display:flex;gap:12px;padding:10px 0;border-top:1px solid #EFEDE6}
+.item:first-of-type{border-top:0}
+.item input{margin:5px 0 0;width:16px;height:16px;flex:0 0 auto;accent-color:#0F6E56}
+.item .body{flex:1 1 auto;min-width:0}
+.item .t{font-size:15px}
+.item.done .t{color:var(--ink3);text-decoration:line-through}
+.item .src{display:block;font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--ink3);line-height:1.6;margin-top:3px;word-break:break-all}
+.item .why{display:block;font-size:13px;color:var(--ink2);margin-top:3px}
+table.def{border-collapse:collapse;width:100%;font-size:14.5px}
+table.def th,table.def td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+table.def th{width:120px;font-weight:600;white-space:nowrap}
+footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink3)}
+footer a{color:var(--ink2)}
+.notice-hero{border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--panel);margin-bottom:18px}
+.notice-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.notice-hero h3{font-size:19px;margin:0 0 4px}
+.notice-hero p{margin:0;color:var(--ink2)}
+.notice-goal{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--ink)}
+.notice-goal b{font-weight:600}
+.notice-legend{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 12px}
+.status-tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.status-tag.ok{background:var(--ok-bg);color:var(--ok-hd)}
+.status-tag.half{background:var(--half-bg);color:var(--half-hd)}
+.status-tag.no{background:var(--no-bg);color:var(--no-hd)}
+.notice-flow{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;margin:0 0 20px}
+.notice-step{position:relative;min-height:150px;border:1px solid var(--line);border-radius:10px;padding:13px 13px 14px;background:#fff}
+.notice-step.ok{border-top:4px solid var(--ok-tx)}
+.notice-step.half{border-top:4px solid var(--half-tx)}
+.notice-step.no{border-top:4px solid var(--no-tx)}
+.notice-step .num{display:block;font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:.04em;margin-bottom:8px}
+.notice-step strong{display:block;font-size:14px;line-height:1.45;margin:8px 0 5px}
+.notice-step p{font-size:12.5px;line-height:1.55;color:var(--ink2);margin:0}
+.step-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:42px 24px;margin:0 0 22px;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.step-card{position:relative;min-height:156px;border:1px solid var(--line);border-radius:11px;padding:14px;background:#fff;box-shadow:0 1px 0 rgba(44,44,42,.03)}
+.step-card.ok{border-top:4px solid var(--ok-tx)}
+.step-card.half{border-top:4px solid var(--half-tx)}
+.step-card.no{border-top:4px solid var(--no-tx)}
+.step-card .num{display:block;font-size:12px;font-weight:700;color:var(--ink3);letter-spacing:.04em;margin-bottom:8px}
+.step-card strong{display:block;font-size:14px;line-height:1.45;margin:8px 0 5px}
+.step-card p{font-size:12.5px;line-height:1.55;color:var(--ink2);margin:0}
+.step-card[data-step="1"]{grid-column:1;grid-row:1}.step-card[data-step="2"]{grid-column:2;grid-row:1}.step-card[data-step="3"]{grid-column:3;grid-row:1}.step-card[data-step="4"]{grid-column:4;grid-row:1}.step-card[data-step="5"]{grid-column:5;grid-row:1}
+.step-card[data-step="6"]{grid-column:5;grid-row:2}.step-card[data-step="7"]{grid-column:4;grid-row:2}.step-card[data-step="8"]{grid-column:3;grid-row:2}.step-card[data-step="9"]{grid-column:2;grid-row:2}.step-card[data-step="10"]{grid-column:1;grid-row:2}
+.step-card:after{position:absolute;color:#888780;font-size:24px;font-weight:400;line-height:1;z-index:2}
+.step-card[data-step="1"]:after,.step-card[data-step="2"]:after,.step-card[data-step="3"]:after,.step-card[data-step="4"]:after{content:"→";right:-22px;top:50%;transform:translate(50%,-50%)}
+.step-card[data-step="5"]:after{content:"↓";left:50%;bottom:-34px;transform:translate(-50%,50%)}
+.step-card[data-step="6"]:after,.step-card[data-step="7"]:after,.step-card[data-step="8"]:after,.step-card[data-step="9"]:after{content:"←";left:-22px;top:50%;transform:translate(-50%,-50%)}
+.step-flow-note{font-size:13px;color:var(--ink3);margin:-8px 0 18px}
+.notice-detail-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:0 0 20px}
+table.notice-detail{border-collapse:collapse;width:100%;min-width:920px;font-size:13.5px}
+table.notice-detail th,table.notice-detail td{text-align:left;vertical-align:top;padding:11px 12px;border-bottom:1px solid var(--line);line-height:1.65}
+table.notice-detail thead th{background:var(--panel);font-weight:600;color:var(--ink)}
+table.notice-detail tbody tr:last-child td{border-bottom:0}
+table.notice-detail th:nth-child(1){width:150px}
+table.notice-detail th:nth-child(2){width:94px}
+table.notice-detail td.good{color:var(--ok-tx)}
+table.notice-detail td.gap{color:var(--no-tx)}
+.notice-input-grid,.notice-scope-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 16px}
+.notice-input,.notice-scope{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff}
+.notice-input h4,.notice-scope h4{font-size:14px;margin:0 0 6px}
+.notice-input p,.notice-scope p{font-size:13.5px;line-height:1.65;color:var(--ink2);margin:0}
+.notice-input.disabled{background:#F1F0EC;color:var(--ink3)}
+.notice-input.disabled h4,.notice-input.disabled p{color:var(--ink3)}
+.notice-rule{border-left:4px solid var(--half-tx);background:var(--half-bg);border-radius:0 10px 10px 0;padding:13px 16px;margin:0 0 18px;color:var(--half-hd)}
+.notice-rule b{font-weight:600}
+.notice-scope.current{background:var(--half-bg);border-color:#E8CFA7}
+.notice-scope.future{background:var(--panel)}
+.notice-scope ul{margin:6px 0 0;padding-left:19px}
+.notice-scope li{font-size:13.5px;line-height:1.7}
+.notice-roadmap{counter-reset:milestone;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.notice-roadmap li{counter-increment:milestone;border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--panel);font-size:13px;color:var(--ink2)}
+.notice-roadmap li:before{content:"M" counter(milestone);display:block;font-size:12px;font-weight:600;color:var(--ink3);margin-bottom:5px}
+.notice-roadmap b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+@media (max-width:760px){
+  .status-overview .status-heading{display:block}
+  .status-overview .asof{margin-top:6px}
+  .status-grid{grid-template-columns:1fr}
+  .check-summary,.check-tracks{grid-template-columns:1fr}
+  .check-group summary{grid-template-columns:40px minmax(0,1fr) auto 16px;padding:12px 13px;gap:8px}
+  .notice-hero-top{display:block}
+  .notice-hero-top .status-tag{margin-top:10px}
+  .notice-flow,.notice-input-grid,.notice-scope-grid,.notice-roadmap{grid-template-columns:1fr}
+  .notice-step{min-height:0}
+  .step-flow{grid-template-columns:1fr;gap:34px;padding:14px}
+  .step-card[data-step]{grid-column:1!important;grid-row:auto!important;min-height:0}
+  .step-card[data-step]:after{content:"↓";left:50%;right:auto;top:auto;bottom:-30px;transform:translate(-50%,50%)}
+}
+@media print{
+  body{font-size:12px}
+  .wrap{max-width:none;padding:0}
+  nav,.progress{display:none}
+  h2{margin-top:26px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .figure svg{min-width:0}
+  .notice-flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .step-flow{grid-template-columns:repeat(5,minmax(0,1fr));gap:28px 14px;padding:12px}
+  .step-card{min-height:132px;padding:10px;break-inside:avoid}
+  .notice-step{min-height:0;break-inside:avoid}
+  .notice-detail-wrap{overflow:visible}
+  table.notice-detail{min-width:0;font-size:10.5px}
+  .notice-input-grid,.notice-scope-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .notice-input,.notice-scope,.notice-roadmap li{break-inside:avoid}
+  .notice-roadmap{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>원가계산서 자동검증 · 현황과 개선안</h1>
+<p class="lead">작성일 2026-08-03 · 근거: <code>src/App.tsx</code>, <code>src/screens</code>, <code>src/utils</code> 코드 확인</p>
+
+<section id="status" class="status-overview" aria-labelledby="status-title">
+  <div class="status-heading">
+    <div><span class="eyebrow">CURRENT STATUS</span><h2 id="status-title">현재 구현 현황</h2></div>
+    <p class="asof">2026-08-03 코드·템플릿 기준</p>
+  </div>
+  <div class="status-grid">
+    <article class="status-panel">
+      <div class="status-panel-head"><strong>원가계산서 자동검증</strong><span>33개 기능</span></div>
+      <div class="status-track" aria-label="동작 12, 일부 동작 7, 동작 안함 14"><span class="ok" style="width:36.36%"></span><span class="half" style="width:21.21%"></span><span class="no" style="width:42.43%"></span></div>
+      <div class="status-counts"><div class="status-count ok"><b>12</b>동작</div><div class="status-count half"><b>7</b>일부 동작</div><div class="status-count no"><b>14</b>동작 안함</div></div>
+      <p class="status-panel-note">핵심 계산·근거 추적은 동작하며, 검토 기록과 진행 화면 정합성은 보완이 필요합니다.</p>
+    </article>
+    <article class="status-panel">
+      <div class="status-panel-head"><strong>공고문 초안 생성</strong><span>10단계 흐름</span></div>
+      <div class="status-track" aria-label="동작 2, 일부 동작 5, 동작 안함 3"><span class="ok" style="width:20%"></span><span class="half" style="width:50%"></span><span class="no" style="width:30%"></span></div>
+      <div class="status-counts"><div class="status-count ok"><b>2</b>동작</div><div class="status-count half"><b>5</b>일부 동작</div><div class="status-count no"><b>3</b>동작 안함</div></div>
+      <p class="status-panel-note">화면 진입과 HWPX 엔진 일부가 있으며, 전체 입력·유형별 템플릿·날짜와 금액 확인은 남아 있습니다.</p>
+    </article>
+  </div>
+</section>
+
+<nav>
+  <a href="#status">현재 현황</a>
+  <a href="#diagram">한눈에 보는 사용자 흐름</a>
+  <a href="#checklist">개선 체크리스트</a>
+  <a href="#notice-plan">공고문 초안 생성</a>
+  <a href="#criteria">판단 기준</a>
+</nav>
+
+<h2 id="diagram">한눈에 보는 사용자 흐름</h2>
+
+<div class="notice-legend" aria-label="상태 범례">
+  <span class="status-tag ok">동작</span>
+  <span class="status-tag half">일부 동작</span>
+  <span class="status-tag no">동작 안함</span>
+</div>
+<div class="step-flow" aria-label="공고문 생성 STEP 01부터 STEP 10까지 사용자 흐름">
+  <article class="step-card ok" data-step="1"><span class="num">STEP 01</span><span class="status-tag ok">동작</span><strong>공고문 생성 진입</strong><p>첫 화면 바로가기 또는 주소로 생성 화면에 들어갑니다.</p></article>
+  <article class="step-card ok" data-step="2"><span class="num">STEP 02</span><span class="status-tag ok">동작</span><strong>원가계산서 입력</strong><p>기존 Excel 업로드·파싱을 사용하며 파일 없이도 바로 갈 수 있습니다.</p></article>
+  <article class="step-card half" data-step="3"><span class="num">STEP 03</span><span class="status-tag half">일부 동작</span><strong>원가계산서 자동 채움</strong><p>파일명과 합계 후보만 공사명·추정가격에 넣습니다.</p></article>
+  <article class="step-card half" data-step="4"><span class="num">STEP 04</span><span class="status-tag half">일부 동작</span><strong>유형별 정보 입력</strong><p>공사·용역·물품 선택과 기본 입력란만 있습니다.</p></article>
+  <article class="step-card half" data-step="5"><span class="num">STEP 05</span><span class="status-tag half">일부 동작</span><strong>필수값 확인</strong><p>현재는 공사명·발주기관·추정가격 3개만 확인합니다.</p></article>
+  <article class="step-card no" data-step="6"><span class="num">STEP 06</span><span class="status-tag no">동작 안함</span><strong>금액 확인</strong><p>원가계산서 금액과 사용자 입력 금액을 아직 대조하지 않습니다.</p></article>
+  <article class="step-card no" data-step="7"><span class="num">STEP 07</span><span class="status-tag no">동작 안함</span><strong>날짜·공휴일 확인</strong><p>초일 불산입 7일과 공휴일 연장 규칙이 없습니다.</p></article>
+  <article class="step-card half" data-step="8"><span class="num">STEP 08</span><span class="status-tag half">일부 동작</span><strong>유형별 템플릿 선택</strong><p>고정 템플릿만 있고 계약유형별 분기는 없습니다.</p></article>
+  <article class="step-card half" data-step="9"><span class="num">STEP 09</span><span class="status-tag half">일부 동작</span><strong>HWPX 생성·다운로드</strong><p>치환 엔진은 있으나 현재 템플릿 반영 항목이 부족합니다.</p></article>
+  <article class="step-card no" data-step="10"><span class="num">STEP 10</span><span class="status-tag no">동작 안함</span><strong>한글에서 최종 확인</strong><p>실제 한글에서 서식·문구·값을 확인하는 인수가 남았습니다.</p></article>
+</div>
+<p class="step-flow-note">위쪽은 STEP 01→05, 아래쪽은 STEP 06→10 순서로 화살표를 따라가면 됩니다.</p>
+
+<template id="archived-diagrams">
+
+<figure class="figure">
+<svg id="archived-user-flow" viewBox="0 0 1500 690" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>원가계산서 검증과 공고문 초안 생성 전체 사용자 플로우</title>
+<desc>사용자가 시작 화면에서 원가계산서 검증 또는 공고문 초안 생성을 선택하고, 각 단계의 현재 동작 상태와 두 흐름 사이의 자동 채움 연결을 확인하는 그림</desc>
+<defs>
+  <marker id="flow-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+
+<g aria-label="공통 시작">
+  <rect class="start" x="28" y="86" width="190" height="88" rx="12"/>
+  <text class="start-title" x="123" y="119" text-anchor="middle">시작 화면</text>
+  <text class="start-sub" x="123" y="141" text-anchor="middle">발주유형 선택</text>
+  <text class="start-sub" x="123" y="159" text-anchor="middle">공사 · 용역 · 구매</text>
+  <path class="edge" d="M218 130H252"/>
+  <polygon class="decision" points="320,78 388,130 320,182 252,130"/>
+  <text class="node-title" x="320" y="124" text-anchor="middle">무엇을</text>
+  <text class="node-title" x="320" y="143" text-anchor="middle">진행할까요?</text>
+  <g class="badge half"><rect x="80" y="181" width="86" height="24" rx="12"/><text x="123" y="197" text-anchor="middle">일부 동작</text></g>
+</g>
+
+<rect class="lane validation" x="410" y="24" width="1060" height="270" rx="16"/>
+<text class="lane-title" x="432" y="52">A. 원가계산서 검증</text>
+<text class="lane-sub" x="432" y="70">파일을 읽고 계산 결과와 근거를 확인하는 현재 운영 흐름</text>
+<path class="edge" d="M369 95H401V149H430"/>
+<text class="edge-label" x="386" y="86">검증</text>
+
+<g class="flow-node half">
+  <rect class="card" x="430" y="94" width="190" height="132" rx="10"/>
+  <g class="badge half"><rect x="444" y="108" width="76" height="22" rx="11"/><text x="482" y="123" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="444" y="155">1. 파일 등록</text>
+  <text class="node-detail" x="444" y="179">원가계산서 · 기준자료 업로드</text>
+  <text class="node-detail" x="444" y="198">Excel 파싱 동작</text>
+  <text class="node-detail" x="444" y="216">PDF 품셈 · 필수자료 확인 미지원</text>
+</g>
+<path class="edge" d="M620 160H638"/>
+<g class="flow-node half">
+  <rect class="card" x="638" y="94" width="190" height="132" rx="10"/>
+  <g class="badge half"><rect x="652" y="108" width="76" height="22" rx="11"/><text x="690" y="123" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="652" y="155">2. 인식 확인</text>
+  <text class="node-detail" x="652" y="179">시트 역할 · 구조 JSON 확인</text>
+  <text class="node-detail" x="652" y="198">검증 모드 · 기준요율 입력</text>
+  <text class="node-detail" x="652" y="216">표준품셈 인식은 미지원</text>
+</g>
+<path class="edge" d="M828 160H846"/>
+<g class="flow-node half">
+  <rect class="card" x="846" y="94" width="190" height="132" rx="10"/>
+  <g class="badge half"><rect x="860" y="108" width="76" height="22" rx="11"/><text x="898" y="123" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="860" y="155">3. 검증 실행</text>
+  <text class="node-detail" x="860" y="179">계산과 규칙 검증은 실행</text>
+  <text class="node-detail" x="860" y="198">진행률 · 확인 중 셀은</text>
+  <text class="node-detail" x="860" y="216">실제 처리와 미연동</text>
+</g>
+<path class="edge" d="M1036 160H1054"/>
+<g class="flow-node ok">
+  <rect class="card" x="1054" y="94" width="190" height="132" rx="10"/>
+  <g class="badge ok"><rect x="1068" y="108" width="60" height="22" rx="11"/><text x="1098" y="123" text-anchor="middle">동작</text></g>
+  <text class="node-title" x="1068" y="155">4. 결과 · 근거 확인</text>
+  <text class="node-detail" x="1068" y="179">상태 요약 · 필터 · 결과표</text>
+  <text class="node-detail" x="1068" y="198">수식 · 참조셀 · 기준자료</text>
+  <text class="node-detail" x="1068" y="216">계산과정과 차액 확인</text>
+</g>
+<path class="edge" d="M1244 160H1262"/>
+<g class="flow-node half">
+  <rect class="card" x="1262" y="94" width="190" height="132" rx="10"/>
+  <g class="badge half"><rect x="1276" y="108" width="76" height="22" rx="11"/><text x="1314" y="123" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="1276" y="155">5. 재검증</text>
+  <text class="node-detail" x="1276" y="179">업로드 화면 복귀는 동작</text>
+  <text class="node-detail" x="1276" y="198">상태 초기화 · 회차 비교</text>
+  <text class="node-detail" x="1276" y="216">결과 내보내기는 미지원</text>
+</g>
+<path class="edge return" d="M1357 226V270H525V228"/>
+<text class="edge-label" x="914" y="287" text-anchor="middle">파일을 고쳐 다시 검증</text>
+
+<rect class="lane notice" x="410" y="344" width="1060" height="286" rx="16"/>
+<text class="lane-title" x="432" y="372">B. 공고문 초안 생성</text>
+<text class="lane-sub" x="432" y="390">발주계획 입력값과 원가계산서 금액을 이용해 HWPX 공고문을 만드는 목표 흐름</text>
+<path class="edge" d="M369 165H398V485H430"/>
+<text class="edge-label" x="379" y="330" transform="rotate(-90 379 330)">공고문 생성</text>
+
+<g class="flow-node ok">
+  <rect class="card" x="430" y="414" width="134" height="142" rx="10"/>
+  <g class="badge ok"><rect x="442" y="428" width="56" height="22" rx="11"/><text x="470" y="443" text-anchor="middle">동작</text></g>
+  <text class="node-title" x="442" y="475">1. 진입</text>
+  <text class="node-detail" x="442" y="499">공고문 생성</text>
+  <text class="node-detail" x="442" y="517">바로가기</text>
+  <text class="node-detail" x="442" y="539">화면 이동</text>
+</g>
+<path class="edge" d="M564 485H576"/>
+<g class="flow-node half">
+  <rect class="card" x="576" y="414" width="134" height="142" rx="10"/>
+  <g class="badge half"><rect x="588" y="428" width="70" height="22" rx="11"/><text x="623" y="443" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="588" y="475">2. 정보 입력</text>
+  <text class="node-detail" x="588" y="499">발주계획 · 담당자</text>
+  <text class="node-detail" x="588" y="517">품목 · 계약조건</text>
+  <text class="node-detail" x="588" y="539">유형별 입력 제어</text>
+</g>
+<path class="edge" d="M710 485H722"/>
+<g class="flow-node half">
+  <rect class="card" x="722" y="414" width="134" height="142" rx="10"/>
+  <g class="badge half"><rect x="734" y="428" width="70" height="22" rx="11"/><text x="769" y="443" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="734" y="475">3. 필수값 확인</text>
+  <text class="node-detail" x="734" y="499">모든 항목 필수</text>
+  <text class="node-detail" x="734" y="517">누락 표시 · 생성</text>
+  <text class="node-detail" x="734" y="539">버튼 제어 보완 필요</text>
+</g>
+<path class="edge" d="M856 485H868"/>
+<g class="flow-node no">
+  <rect class="card" x="868" y="414" width="134" height="142" rx="10"/>
+  <g class="badge no"><rect x="880" y="428" width="74" height="22" rx="11"/><text x="917" y="443" text-anchor="middle">동작 안함</text></g>
+  <text class="node-title" x="880" y="475">4. 날짜 · 금액</text>
+  <text class="node-detail" x="880" y="499">7일 이상 · 초일불산입</text>
+  <text class="node-detail" x="880" y="517">공휴일 다음날 연장</text>
+  <text class="node-detail" x="880" y="539">원가 합계 대조</text>
+</g>
+<path class="edge" d="M1002 485H1014"/>
+<g class="flow-node half">
+  <rect class="card" x="1014" y="414" width="134" height="142" rx="10"/>
+  <g class="badge half"><rect x="1026" y="428" width="70" height="22" rx="11"/><text x="1061" y="443" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="1026" y="475">5. 템플릿 선택</text>
+  <text class="node-detail" x="1026" y="499">현재 공사 기준</text>
+  <text class="node-detail" x="1026" y="517">용역 · 구매는</text>
+  <text class="node-detail" x="1026" y="539">향후 확장</text>
+</g>
+<path class="edge" d="M1148 485H1160"/>
+<g class="flow-node half">
+  <rect class="card" x="1160" y="414" width="134" height="142" rx="10"/>
+  <g class="badge half"><rect x="1172" y="428" width="70" height="22" rx="11"/><text x="1207" y="443" text-anchor="middle">일부 동작</text></g>
+  <text class="node-title" x="1172" y="475">6. HWPX 생성</text>
+  <text class="node-detail" x="1172" y="499">입력값 치환 · 저장</text>
+  <text class="node-detail" x="1172" y="517">다운로드 흐름</text>
+  <text class="node-detail" x="1172" y="539">완성도 보완 필요</text>
+</g>
+<path class="edge" d="M1294 485H1306"/>
+<g class="flow-node no">
+  <rect class="card" x="1306" y="414" width="134" height="142" rx="10"/>
+  <g class="badge no"><rect x="1318" y="428" width="74" height="22" rx="11"/><text x="1355" y="443" text-anchor="middle">동작 안함</text></g>
+  <text class="node-title" x="1318" y="475">7. 최종 확인</text>
+  <text class="node-detail" x="1318" y="499">한글에서 열기</text>
+  <text class="node-detail" x="1318" y="517">서식 · 문구 검토</text>
+  <text class="node-detail" x="1318" y="539">확정 · 배포</text>
+</g>
+
+<path class="edge cross" d="M1149 226V316H643V412"/>
+<rect x="794" y="304" width="204" height="25" rx="12" fill="#FFF3D9" stroke="#D39B45"/>
+<text class="edge-label" x="896" y="321" text-anchor="middle">파일명 · 합계 후보 자동 채움 · 일부 동작</text>
+
+<g aria-label="상태 범례">
+  <g class="badge ok"><rect x="430" y="651" width="60" height="22" rx="11"/><text x="460" y="666" text-anchor="middle">동작</text></g>
+  <g class="badge half"><rect x="502" y="651" width="76" height="22" rx="11"/><text x="540" y="666" text-anchor="middle">일부 동작</text></g>
+  <g class="badge no"><rect x="590" y="651" width="82" height="22" rx="11"/><text x="631" y="666" text-anchor="middle">동작 안함</text></g>
+  <text class="legend-label" x="690" y="666">현재 코드 기준 · 점선은 단계 간 데이터 재사용 또는 되돌아가기</text>
+</g>
+</svg>
+<figcaption>두 경로를 한 그림에 담았습니다. 작은 화면에서는 가로로 스크롤하면 전체 흐름과 각 단계의 동작 상태를 볼 수 있습니다.</figcaption>
+</figure>
+
+<figure class="figure" hidden aria-hidden="true">
+<svg id="archived-dg" viewBox="0 0 1372 500" role="img" xmlns="http://www.w3.org/2000/svg"><title>이전 단계별 기능 동작 상태</title><desc>새 전체 사용자 플로우로 대체된 이전 세부 다이어그램</desc>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<rect class="box" x="20" y="20" width="180" height="56" rx="4"/>
+<text class="hd" x="32" y="38">1 유형 선택</text><text class="hs" x="32" y="54">UploadScreen</text><text class="hs" x="32" y="70">동작 0 · 일부 1 · 안함 2</text>
+<g class="a"><rect x="20" y="86" width="180" height="58" rx="4"/><text class="nm" x="32" y="104">유형 3종 선택</text><text class="st" x="188" y="104" text-anchor="end">일부</text><text class="dt" x="32" y="122">선택값은 IR에 저장,</text><text class="dt" x="32" y="136">검증 분기 없음</text></g>
+<g class="r"><rect x="20" y="152" width="180" height="58" rx="4"/><text class="nm" x="32" y="170">도움말 버튼</text><text class="st" x="188" y="170" text-anchor="end">안함</text><text class="dt" x="32" y="188">onClick 없음,</text><text class="dt" x="32" y="202">눌러도 반응 없음</text></g>
+<g class="r"><rect x="20" y="218" width="180" height="58" rx="4"/><text class="nm" x="32" y="236">결과 유형 표기</text><text class="st" x="188" y="236" text-anchor="end">안함</text><text class="dt" x="32" y="254">머리글 '공사' 고정,</text><text class="dt" x="32" y="268">유형 무시</text></g>
+<line class="flow" x1="200" y1="48" x2="211" y2="48" marker-end="url(#ar)"/>
+
+<rect class="box" x="212" y="20" width="180" height="56" rx="4"/>
+<text class="hd" x="224" y="38">2 파일 등록</text><text class="hs" x="224" y="54">UploadScreen</text><text class="hs" x="224" y="70">동작 1 · 일부 2 · 안함 3</text>
+<g class="t"><rect x="212" y="86" width="180" height="58" rx="4"/><text class="nm" x="224" y="104">원가계산서 파싱</text><text class="st" x="380" y="104" text-anchor="end">동작</text><text class="dt" x="224" y="122">시트·셀·수식·병합을</text><text class="dt" x="224" y="136">IR로 정규화</text></g>
+<g class="a"><rect x="212" y="152" width="180" height="58" rx="4"/><text class="nm" x="224" y="170">제비율 Excel 파싱</text><text class="st" x="380" y="170" text-anchor="end">일부</text><text class="dt" x="224" y="188">요율·셀 근거 추출,</text><text class="dt" x="224" y="202">휴리스틱 오탐 가능</text></g>
+<g class="a"><rect x="212" y="218" width="180" height="58" rx="4"/><text class="nm" x="224" y="236">노임단가 파싱</text><text class="st" x="380" y="236" text-anchor="end">일부</text><text class="dt" x="224" y="254">직종 단가 추출,</text><text class="dt" x="224" y="268">미매칭 행은 제외</text></g>
+<g class="r"><rect x="212" y="284" width="180" height="58" rx="4"/><text class="nm" x="224" y="302">표준품셈 PDF 파싱</text><text class="st" x="380" y="302" text-anchor="end">안함</text><text class="dt" x="224" y="320">파일명만 저장,</text><text class="dt" x="224" y="334">PDF 파서 없음</text></g>
+<g class="r"><rect x="212" y="350" width="180" height="58" rx="4"/><text class="nm" x="224" y="368">필수 자료 게이팅</text><text class="st" x="380" y="368" text-anchor="end">안함</text><text class="dt" x="224" y="386">원가계산서만 있으면</text><text class="dt" x="224" y="400">그냥 시작됨</text></g>
+<g class="r"><rect x="212" y="416" width="180" height="58" rx="4"/><text class="nm" x="224" y="434">파싱 상태 표시</text><text class="st" x="380" y="434" text-anchor="end">안함</text><text class="dt" x="224" y="452">로딩 표시 없음,</text><text class="dt" x="224" y="466">실패는 문구 한 줄</text></g>
+<line class="flow" x1="392" y1="48" x2="403" y2="48" marker-end="url(#ar)"/>
+
+<rect class="box" x="404" y="20" width="180" height="56" rx="4"/>
+<text class="hd" x="416" y="38">3 인식 확인</text><text class="hs" x="416" y="54">RecognitionScreen</text><text class="hs" x="416" y="70">동작 3 · 일부 1 · 안함 2</text>
+<g class="a"><rect x="404" y="86" width="180" height="58" rx="4"/><text class="nm" x="416" y="104">시트 역할 인식</text><text class="st" x="572" y="104" text-anchor="end">일부</text><text class="dt" x="416" y="122">역할은 실제 판별,</text><text class="dt" x="416" y="136">상태·설명은 고정표</text></g>
+<g class="t"><rect x="404" y="152" width="180" height="58" rx="4"/><text class="nm" x="416" y="170">구조 JSON 저장</text><text class="st" x="572" y="170" text-anchor="end">동작</text><text class="dt" x="416" y="188">실제 IR을 표시하고</text><text class="dt" x="416" y="202">파일로 저장</text></g>
+<g class="t"><rect x="404" y="218" width="180" height="58" rx="4"/><text class="nm" x="416" y="236">검증 모드 선택</text><text class="st" x="572" y="236" text-anchor="end">동작</text><text class="dt" x="416" y="254">선택이 실제 검증에</text><text class="dt" x="416" y="268">그대로 반영</text></g>
+<g class="t"><rect x="404" y="284" width="180" height="58" rx="4"/><text class="nm" x="416" y="302">기준요율 입력</text><text class="st" x="572" y="302" text-anchor="end">동작</text><text class="dt" x="416" y="320">수기 %가 파싱값을</text><text class="dt" x="416" y="334">최종 override</text></g>
+<g class="r"><rect x="404" y="350" width="180" height="58" rx="4"/><text class="nm" x="416" y="368">표준품셈 카드</text><text class="st" x="572" y="368" text-anchor="end">안함</text><text class="dt" x="416" y="386">올려도 0개 인식,</text><text class="dt" x="416" y="400">검증 미투입</text></g>
+<g class="r"><rect x="404" y="416" width="180" height="58" rx="4"/><text class="nm" x="416" y="434">확인 필요 안내</text><text class="st" x="572" y="434" text-anchor="end">안함</text><text class="dt" x="416" y="452">데모 문구 고정,</text><text class="dt" x="416" y="466">항상 같은 문장</text></g>
+<line class="flow" x1="584" y1="48" x2="595" y2="48" marker-end="url(#ar)"/>
+
+<rect class="box" x="596" y="20" width="180" height="56" rx="4"/>
+<text class="hd" x="608" y="38">4 검증 대기</text><text class="hs" x="608" y="54">ProgressScreen</text><text class="hs" x="608" y="70">동작 0 · 일부 1 · 안함 2</text>
+<g class="a"><rect x="596" y="86" width="180" height="58" rx="4"/><text class="nm" x="608" y="104">8단계 목록 표시</text><text class="st" x="764" y="104" text-anchor="end">일부</text><text class="dt" x="608" y="122">1개만 실제 수치,</text><text class="dt" x="608" y="136">7개는 데모 문구</text></g>
+<g class="r"><rect x="596" y="152" width="180" height="58" rx="4"/><text class="nm" x="608" y="170">진행률 연동</text><text class="st" x="764" y="170" text-anchor="end">안함</text><text class="dt" x="608" y="188">220ms 타이머,</text><text class="dt" x="608" y="202">계산은 이미 끝남</text></g>
+<g class="r"><rect x="596" y="218" width="180" height="58" rx="4"/><text class="nm" x="608" y="236">현재 확인 중 셀</text><text class="st" x="764" y="236" text-anchor="end">안함</text><text class="dt" x="608" y="254">표시되는 셀 주소가</text><text class="dt" x="608" y="268">고정 문구</text></g>
+<line class="flow" x1="776" y1="48" x2="787" y2="48" marker-end="url(#ar)"/>
+
+<rect class="box" x="788" y="20" width="180" height="56" rx="4"/>
+<text class="hd" x="800" y="38">5 결과 판독</text><text class="hs" x="800" y="54">DashboardScreen</text><text class="hs" x="800" y="70">동작 4 · 일부 1 · 안함 1</text>
+<g class="t"><rect x="788" y="86" width="180" height="58" rx="4"/><text class="nm" x="800" y="104">상태 요약 6종</text><text class="st" x="956" y="104" text-anchor="end">동작</text><text class="dt" x="800" y="122">실제 결과의</text><text class="dt" x="800" y="136">상태별 건수 집계</text></g>
+<g class="t"><rect x="788" y="152" width="180" height="58" rx="4"/><text class="nm" x="800" y="170">핵심 확인사항</text><text class="st" x="956" y="170" text-anchor="end">동작</text><text class="dt" x="800" y="188">오류·확인 상위 5건</text><text class="dt" x="800" y="202">우선 정렬</text></g>
+<g class="t"><rect x="788" y="218" width="180" height="58" rx="4"/><text class="nm" x="800" y="236">정규화 리포트 표</text><text class="st" x="956" y="236" text-anchor="end">동작</text><text class="dt" x="800" y="254">정규화 행 14컬럼에</text><text class="dt" x="800" y="268">검증 상태 주석</text></g>
+<g class="t"><rect x="788" y="284" width="180" height="58" rx="4"/><text class="nm" x="800" y="302">상태·시트 필터</text><text class="st" x="956" y="302" text-anchor="end">동작</text><text class="dt" x="800" y="320">결과 목록과 표에</text><text class="dt" x="800" y="334">즉시 반영</text></g>
+<g class="a"><rect x="788" y="350" width="180" height="58" rx="4"/><text class="nm" x="800" y="368">종류 필터</text><text class="st" x="956" y="368" text-anchor="end">일부</text><text class="dt" x="800" y="386">칩 2개는 항상 0건,</text><text class="dt" x="800" y="400">실제 종류 2개 누락</text></g>
+<g class="r"><rect x="788" y="416" width="180" height="58" rx="4"/><text class="nm" x="800" y="434">결과 내보내기</text><text class="st" x="956" y="434" text-anchor="end">안함</text><text class="dt" x="800" y="452">Excel·PDF 없음,</text><text class="dt" x="800" y="466">JSON만 가능</text></g>
+<line class="flow" x1="968" y1="48" x2="979" y2="48" marker-end="url(#ar)"/>
+
+<rect class="box" x="980" y="20" width="180" height="56" rx="4"/>
+<text class="hd" x="992" y="38">6 근거 추적</text><text class="hs" x="992" y="54">DetailScreen</text><text class="hs" x="992" y="70">동작 3 · 일부 1 · 안함 2</text>
+<g class="t"><rect x="980" y="86" width="180" height="58" rx="4"/><text class="nm" x="992" y="104">원본 수식·참조셀</text><text class="st" x="1148" y="104" text-anchor="end">동작</text><text class="dt" x="992" y="122">대상 셀 기준 3행</text><text class="dt" x="992" y="136">실제 생성</text></g>
+<g class="t"><rect x="980" y="152" width="180" height="58" rx="4"/><text class="nm" x="992" y="170">기준자료 셀 근거</text><text class="st" x="1148" y="170" text-anchor="end">동작</text><text class="dt" x="992" y="188">시트·셀·표시값·</text><text class="dt" x="992" y="202">인용까지 연결</text></g>
+<g class="t"><rect x="980" y="218" width="180" height="58" rx="4"/><text class="nm" x="992" y="236">계산과정·차액</text><text class="st" x="1148" y="236" text-anchor="end">동작</text><text class="dt" x="992" y="254">기초×요율 기대값과</text><text class="dt" x="992" y="268">차액 비교</text></g>
+<g class="a"><rect x="980" y="284" width="180" height="58" rx="4"/><text class="nm" x="992" y="302">이전·다음 이동</text><text class="st" x="1148" y="302" text-anchor="end">일부</text><text class="dt" x="992" y="320">오류만 순환, 정상</text><text class="dt" x="992" y="334">항목에선 점프</text></g>
+<g class="r"><rect x="980" y="350" width="180" height="58" rx="4"/><text class="nm" x="992" y="368">판단 메모 저장</text><text class="st" x="1148" y="368" text-anchor="end">안함</text><text class="dt" x="992" y="386">비제어 입력,</text><text class="dt" x="992" y="400">화면 이동 시 소실</text></g>
+<g class="r"><rect x="980" y="416" width="180" height="58" rx="4"/><text class="nm" x="992" y="434">해결상태 변경</text><text class="st" x="1148" y="434" text-anchor="end">안함</text><text class="dt" x="992" y="452">표에 출력만,</text><text class="dt" x="992" y="466">바꿀 컨트롤 없음</text></g>
+<line class="flow" x1="1160" y1="48" x2="1171" y2="48" marker-end="url(#ar)"/>
+
+<rect class="box" x="1172" y="20" width="180" height="56" rx="4"/>
+<text class="hd" x="1184" y="38">7 재검증</text><text class="hs" x="1184" y="54">1단계로 회귀</text><text class="hs" x="1184" y="70">동작 1 · 일부 0 · 안함 2</text>
+<g class="t"><rect x="1172" y="86" width="180" height="58" rx="4"/><text class="nm" x="1184" y="104">1단계 복귀</text><text class="st" x="1340" y="104" text-anchor="end">동작</text><text class="dt" x="1184" y="122">'파일 다시 검증'이</text><text class="dt" x="1184" y="136">업로드로 전환</text></g>
+<g class="r"><rect x="1172" y="152" width="180" height="58" rx="4"/><text class="nm" x="1184" y="170">상태 초기화</text><text class="st" x="1340" y="170" text-anchor="end">안함</text><text class="dt" x="1184" y="188">이전 파일·결과가</text><text class="dt" x="1184" y="202">그대로 잔존</text></g>
+<g class="r"><rect x="1172" y="218" width="180" height="58" rx="4"/><text class="nm" x="1184" y="236">회차 비교</text><text class="st" x="1340" y="236" text-anchor="end">안함</text><text class="dt" x="1184" y="254">저장 없음,</text><text class="dt" x="1184" y="268">새로고침 시 소실</text></g>
+</svg>
+<figcaption>가로 스크롤로 7단계를 모두 볼 수 있습니다. 같은 그림의 PNG는 기능-동작상태-다이어그램-가로.png, 세로 상세판은 기능-동작상태-다이어그램.png입니다.</figcaption>
+</figure>
+</template>
+
+<h2 id="checklist">개선 체크리스트</h2>
+<p class="check-intro">전체 항목은 두 작업 트랙으로 나눴습니다. 묶음을 열어 세부 작업을 확인하면 되며, 체크 상태는 이 브라우저에 저장됩니다.</p>
+<div class="check-summary">
+  <article class="check-summary-card"><div class="check-summary-head"><strong>원가계산서 검증</strong><b><span id="validation-done">0</span> / 23</b></div><div class="check-progress-bar" aria-hidden="true"><span id="validation-bar"></span></div><p>5개 개선 묶음 · 기존 체크 상태 유지</p></article>
+  <article class="check-summary-card"><div class="check-summary-head"><strong>공고문 생성</strong><b><span id="notice-done">0</span> / 15</b></div><div class="check-progress-bar" aria-hidden="true"><span id="notice-bar"></span></div><p>4개 개선 묶음 · 공사 우선, 용역·구매 확장</p></article>
+</div>
+<div class="check-tracks">
+<section class="check-track validation" data-track="validation">
+<header class="check-track-head"><strong>원가계산서 검증</strong><span>신뢰도 → 검토이력 → 정확도 순서</span></header>
+<details class="check-group">
+<summary><span class="group-priority">먼저</span><span class="group-title">고정값·데모 문구 제거<small>사용자 파일과 다른 표시부터 바로잡기</small></span><span class="group-progress"><b data-group-done>0</b> / 6</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">결과 화면 머리글의 '공사' 고정값을 선택한 유형으로 바꾸기</span><span class="src">src/screens/DashboardScreen.tsx:70</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">도움말 버튼에 동작을 붙이거나 버튼을 없애기</span><span class="src">src/screens/UploadScreen.tsx:63</span><span class="why">onClick 핸들러 없음</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">"지금 확인 중" 아래 고정된 셀 주소 문구 제거</span><span class="src">src/screens/ProgressScreen.tsx:64</span><span class="why">'추정가격내역서!H32 · 산업안전보건관리비' 고정</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">인식 화면 경고 문장을 실제 확인 필요 항목으로 교체</span><span class="src">src/screens/RecognitionScreen.tsx:248 · src/data/sampleResults.ts:74</span><span class="why">'가격조사서의 적용단가 열을 선택해 주세요.' 고정</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">기준자료를 안 올렸는데 '3개'로 표시되는 || 3 제거</span><span class="src">src/screens/DashboardScreen.tsx:70 · src/screens/RecognitionScreen.tsx:110</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">다시 검증할 때 이전 파일·결과 비우기</span><span class="src">src/App.tsx:224</span><span class="why">onRestart가 setStep만 호출, excelFile·workbookIR·results 잔존</span></span></label>
+</div></details>
+<details class="check-group">
+<summary><span class="group-priority">먼저</span><span class="group-title">검토 기록 남기기<small>메모·해결상태·회차를 보존</small></span><span class="group-progress"><b data-group-done>0</b> / 5</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">메모를 상태로 올리고 해당 검증 항목에 붙여 저장</span><span class="src">src/screens/DetailScreen.tsx:167</span><span class="why">비제어 textarea, 저장소 없음</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">해결상태를 사용자가 바꿀 수 있게 (확인함·예외 인정·수정 필요)</span><span class="src">src/screens/DashboardScreen.tsx:276</span><span class="why">resolutionStatus 출력만</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">새로고침해도 결과가 살아남도록 세션 저장 붙이기</span><span class="why">현재 localStorage 등 영속 저장 전혀 없음</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">검사 회차를 쌓고 지난 회차와 달라진 항목만 비교</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">결과를 Excel·PDF로 내보내기</span><span class="src">src/utils/download.ts</span><span class="why">현재 downloadJson(구조 JSON)만 존재</span></span></label>
+</div></details>
+<details class="check-group">
+<summary><span class="group-priority">다음</span><span class="group-title">실제 진행상태 연결<small>가짜 진행률과 고정 설명 제거</small></span><span class="group-progress"><b data-group-done>0</b> / 3</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">무거운 검증을 비동기로 분리해 클릭 직후 멈춤 없애기</span><span class="src">src/App.tsx:143</span><span class="why">runValidation이 화면 전환 전 동기 실행</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">진행률을 실제 검증 단계에 연결</span><span class="src">src/screens/ProgressScreen.tsx:21</span><span class="why">단계당 220ms 고정 타이머</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">검사 목록 8줄 설명을 전부 내 파일 수치로</span><span class="src">src/App.tsx:89 · src/data/sampleResults.ts:78</span><span class="why">8줄 중 1줄만 실제 IR 수치로 교체</span></span></label>
+</div></details>
+<details class="check-group">
+<summary><span class="group-priority">다음</span><span class="group-title">업로드 경험 정리<small>필수조건·로딩·실패 안내 통일</small></span><span class="group-progress"><b data-group-done>0</b> / 3</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">'필수' 라벨과 실제 시작 조건을 일치시키기 (라벨을 권장으로 바꾸든, 게이팅을 걸든 한쪽으로)</span><span class="src">src/screens/UploadScreen.tsx:206 · 라벨 133·164행 · 안내 문구 205행</span><span class="why">disabled={!excelFile}</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">파일 읽는 중 로딩 표시 + 실패 시 눈에 띄는 알림과 재시도</span><span class="src">src/screens/UploadScreen.tsx:93</span><span class="why">await 중 로딩 상태 없음, catch는 문구만 교체</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">표준품셈 PDF가 아직 검사에 안 쓰인다는 사실을 업로드 시점에 명시</span><span class="src">src/screens/UploadScreen.tsx:181</span></span></label>
+</div></details>
+<details class="check-group">
+<summary><span class="group-priority">후속</span><span class="group-title">정확도·유형 정합성<small>파서 오탐과 유형 불일치 개선</small></span><span class="group-progress"><b data-group-done>0</b> / 6</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">표준품셈 PDF 파서 구현하고 인식 카드·판단근거까지 연결</span><span class="src">src/screens/UploadScreen.tsx:183 · src/screens/RecognitionScreen.tsx:84</span><span class="why">파일 메타만 저장, 업로드해도 count 0</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">발주 유형별로 검증을 실제로 분기 (또는 유형 선택 범위를 정직하게 줄이기)</span><span class="src">grep -E "pt ===|procurementType ===" src/utils/*.ts → 0건</span><span class="why">procurementType이 IR·결과 메타데이터로만 흐름</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">종류 필터 칩을 엔진이 만드는 종류와 맞추기 (BASE·CONDITION 제거, LABOR·REFERENCE 추가)</span><span class="src">src/screens/DashboardScreen.tsx:30</span><span class="why">엔진 실제 산출: ARITHMETIC / TOTAL / RATE / FORMULA / LABOR / REFERENCE</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">제비율·노임단가 파서의 오탐과 직종명 미매칭을 화면에 드러내기</span><span class="src">src/utils/criteria.ts</span><span class="why">별칭 스캔 + %서식·단가 휴리스틱</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">시트 인식의 상태·설명을 고정표가 아니라 파일 근거로 산출</span><span class="src">src/utils/excel.ts:47</span><span class="why">ROLE_DISPLAY 역할별 고정 문구·상태</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">정상 항목을 보다가 이전·다음을 눌러도 위치를 잃지 않게</span><span class="src">src/utils/results.ts:85</span><span class="why">findIndex -1이면 첫 오류 항목으로 점프</span></span></label>
+</div></details>
+</section>
+
+<section class="check-track notice" data-track="notice">
+<header class="check-track-head"><strong>공고문 생성</strong><span>입력 완성 → 템플릿 → 인수 순서</span></header>
+
+<details class="check-group">
+<summary><span class="group-priority">먼저</span><span class="group-title">입력 화면 완성<small>발주계획 캡처 기준 전체 항목</small></span><span class="group-progress"><b data-group-done>0</b> / 5</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">발주계획 캡처의 기본·계약·금액·품목·담당자 필드를 모두 추가</span><span class="why">현재 공고·금액·일정·담당자 일부만 존재</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">원가계산서에서 사업명·금액 외 자동 채움 가능한 항목 매핑</span><span class="src">src/utils/notice.ts</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">계약유형과 입찰방법에 맞지 않는 항목을 숨기지 않고 회색 비활성화</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">현재 활성화된 모든 입력항목을 필수 처리하고 누락 항목 안내</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">날짜·금액 직접 입력값이 공고문에 쓰인다는 안내와 수정 흐름 제공</span></span></label>
+</div></details>
+
+<details class="check-group">
+<summary><span class="group-priority">먼저</span><span class="group-title">유형별 템플릿 준비<small>공사 우선, 용역·구매 확장</small></span><span class="group-progress"><b data-group-done>0</b> / 4</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">공사입찰공고 실제 HWPX 템플릿에 전체 자리표시자 삽입</span><span class="why">현재 14개 후보 중 입찰종류 1개만 존재</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">공사·용역·구매 선택에 따라 템플릿 파일을 분기</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">용역입찰공고 HWPX 템플릿과 전용 필드 연결</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">구매입찰공고 HWPX 템플릿과 품목정보 연결</span></span></label>
+</div></details>
+
+<details class="check-group">
+<summary><span class="group-priority">다음</span><span class="group-title">HWPX 생성·인수<small>다운로드부터 한글 확인까지</small></span><span class="group-progress"><b data-group-done>0</b> / 3</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">브라우저에서 입력 → 치환 → HWPX 다운로드 전체 흐름 검증</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">생성 파일을 다시 풀어 모든 입력값과 잔여 자리표시자 확인</span><span class="src">scripts/hwpx-tools.mjs</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">한글에서 생성 파일을 열어 서식·문구·치환값 최종 인수</span></span></label>
+</div></details>
+
+<details class="check-group">
+<summary><span class="group-priority">후속</span><span class="group-title">날짜·금액 검증<small>공고기간 규정과 원가 대조</small></span><span class="group-progress"><b data-group-done>0</b> / 3</span><svg class="group-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+<div class="group-items">
+<label class="item"><input type="checkbox"><span class="body"><span class="t">원가계산서 금액과 사용자 입력 금액을 대조하고 차이 안내</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">공휴일 정보를 연동해 공고기간 계산에 사용</span></span></label>
+<label class="item"><input type="checkbox"><span class="body"><span class="t">초일 불산입 7일을 확인하고 7일째가 공휴일이면 다음 영업일까지 연장</span></span></label>
+</div></details>
+</section>
+</div>
+
+<h2 id="notice-plan">공고문 초안 생성 · 사용자 흐름과 개발 현황</h2>
+
+<section class="notice-hero" aria-labelledby="notice-goal-title">
+  <div class="notice-hero-top">
+    <div>
+      <h3 id="notice-goal-title">원가계산서와 발주정보를 HWPX 공고문 초안으로</h3>
+      <p>기존 7단계 검증과는 별도로 첫 화면에서 바로 진입할 수 있는 후속 기능입니다.</p>
+    </div>
+    <span class="status-tag half">설계 완료 · 구현 예정</span>
+  </div>
+  <div class="notice-goal"><b>입력</b> 원가계산서 + 사용자 발주정보 &nbsp;→&nbsp; <b>처리</b> 필수값 확인 + 유형별 템플릿 치환 &nbsp;→&nbsp; <b>출력</b> HWPX 입찰공고문 초안</div>
+</section>
+
+<h3>단계별 상세내역 <span class="lead">· 2026-08-03 현재 작업 폴더 기준</span></h3>
+<div class="notice-detail-wrap">
+<table class="notice-detail">
+  <thead><tr><th>단계</th><th>상태</th><th>동작하는 것</th><th>동작하지 않거나 부족한 것</th></tr></thead>
+  <tbody>
+    <tr><td><b>공고문 생성 진입</b></td><td><span class="status-tag ok">동작</span></td><td class="good">첫 화면의 바로가기, <code>notice</code> 화면 전환, <code>?step=notice</code> 직접 진입, 돌아가기 코드가 있습니다.</td><td class="gap">별도 랜딩과 진행상태 저장은 없습니다.</td></tr>
+    <tr><td><b>원가계산서 입력</b></td><td><span class="status-tag ok">동작</span></td><td class="good">기존 원가계산서 Excel 업로드와 파싱 흐름을 그대로 사용할 수 있고, 파일 없이 바로 진입할 수도 있습니다.</td><td class="gap">공고문 생성 관점의 입력 안내와 업로드 오류 복구는 더 정리해야 합니다.</td></tr>
+    <tr><td><b>자동 채움</b></td><td><span class="status-tag half">일부 동작</span></td><td class="good">업로드 파일명에서 사업명 후보를 만들고 합계 후보를 찾아 추정가격에 넣는 코드가 있습니다.</td><td class="gap">사업소·부서·계약정보·일정은 채우지 않으며, 추출 금액의 정확성도 확인하지 않습니다.</td></tr>
+    <tr><td><b>유형별 정보 입력</b></td><td><span class="status-tag half">일부 동작</span></td><td class="good">공사·용역·물품과 입찰종류 선택, 공고·금액·일정·담당자 일부 입력란이 있습니다.</td><td class="gap">발주계획번호·발주년월·세부계약종류·협정대상·사급자재비·수의계약·품목·부서별 담당자 입력과 조건별 비활성화가 없습니다.</td></tr>
+    <tr><td><b>필수값 확인</b></td><td><span class="status-tag half">일부 동작</span></td><td class="good">공사명·발주기관·추정가격이 비면 생성 버튼을 끄고 누락 항목을 안내합니다.</td><td class="gap">활성화된 모든 항목을 필수 처리하지 않으며, 유형·입찰방법에 따른 필수 규칙도 없습니다.</td></tr>
+    <tr><td><b>금액 확인</b></td><td><span class="status-tag no">동작 안함</span></td><td class="good">추정가격과 예비가격기초금액을 직접 입력할 수 있습니다.</td><td class="gap">원가계산서 금액과 입력 금액을 비교하거나 오류를 판정하지 않습니다.</td></tr>
+    <tr><td><b>날짜·공휴일 확인</b></td><td><span class="status-tag no">동작 안함</span></td><td class="good">공고일·입찰마감일시·개찰일시를 직접 입력할 수 있습니다.</td><td class="gap">초일 불산입 7일, 공휴일 여부, 다음 영업일까지 연장하는 규칙을 검사하지 않습니다.</td></tr>
+    <tr><td><b>유형별 템플릿 선택</b></td><td><span class="status-tag half">일부 동작</span></td><td class="good">고정 HWPX 템플릿을 불러오는 코드와 공사 템플릿 파일이 있습니다.</td><td class="gap">공사·용역·구매 분기가 없고, 현재 템플릿은 앱이 아는 14개 자리표시자 중 <code>{{입찰종류}}</code> 1개만 담고 있습니다.</td></tr>
+    <tr><td><b>HWPX 생성·다운로드</b></td><td><span class="status-tag half">일부 동작</span></td><td class="good">ZIP 해제·XML 치환·이스케이프·재압축·다운로드 엔진이 있으며 템플릿 검사와 fill-test가 통과합니다.</td><td class="gap">현재는 사용자 입력 대부분이 결과 문서에 반영되지 않고, 브라우저 전체 흐름과 실제 공고문 내용도 인수되지 않았습니다.</td></tr>
+    <tr><td><b>한글에서 최종 확인</b></td><td><span class="status-tag no">동작 안함</span></td><td class="good">생성 파일을 한글에서 확인하라는 안내 문구는 있습니다.</td><td class="gap">한글에서 열어 서식·문구·치환값을 확인한 최종 인수 결과가 없습니다.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>사용자가 입력해야 하는 항목</h3>
+<div class="notice-input-grid">
+  <div class="notice-input"><h4>기본정보</h4><p>사업소 · 발주계획번호 · 발주계획명 · 발주년월</p></div>
+  <div class="notice-input"><h4>계약정보</h4><p>계약종류 · 세부계약종류 · 협정대상 여부 · 입찰방법</p></div>
+  <div class="notice-input"><h4>금액정보</h4><p>예산 · 도급자 설치 사급자재비 · 발주자 설치 사급자재비</p></div>
+  <div class="notice-input disabled"><h4>수의계약정보 · 조건부 활성</h4><p>수의계약 사유 · 수의계약 근거. 수의계약이 아니면 회색 비활성화합니다.</p></div>
+  <div class="notice-input disabled"><h4>품목정보 · 구매일 때 활성</h4><p>대표품목코드 · 물품예산금액 · 품목수량 · 단위</p></div>
+  <div class="notice-input"><h4>담당자정보</h4><p>수요부서와 담당자·연락처 · 계약부서와 담당자·연락처</p></div>
+  <div class="notice-input"><h4>공고정보</h4><p>입찰공고번호 · 공고일 · 입찰마감일시 · 개찰일시 · 사업기간 · 사업내용</p></div>
+  <div class="notice-input disabled"><h4>사급자재비 · 공사일 때 활성</h4><p>공사가 아니면 항목은 숨기지 않고 회색 비활성화합니다.</p></div>
+</div>
+
+<p class="notice-rule"><b>입력 원칙:</b> 항목은 숨기지 않습니다. 계약유형과 입찰방법에 맞지 않는 항목은 회색 비활성화하고, 현재 활성화된 항목은 모두 필수로 처리합니다.</p>
+
+<h3>1차 구현과 후속 개발</h3>
+<div class="notice-scope-grid">
+  <section class="notice-scope current"><h4>1차 · 공고문 초안부터 생성</h4><ul><li>공사입찰공고 HWPX 템플릿 우선</li><li>날짜와 금액은 사용자가 직접 입력·수정</li><li>활성화된 모든 필수값 확인</li><li>자리표시자 치환 후 HWPX 다운로드</li></ul></section>
+  <section class="notice-scope future"><h4>후속 · 정확한 금액과 공고기간 확인</h4><ul><li>용역·구매 유형별 템플릿 추가</li><li>원가계산서 금액과 입력 금액 대조</li><li>공고일 초일 불산입, 최소 7일 확보</li><li>7일째가 공휴일이면 다음 영업일까지 연장</li><li>공휴일 데이터 연동과 오류 안내</li></ul></section>
+</div>
+
+<h3>구현 마일스톤</h3>
+<ol class="notice-roadmap">
+  <li><b>화면 연결</b>첫 화면 바로가기와 공고문 생성 경로를 연결합니다.</li>
+  <li><b>유형별 입력 폼</b>전체 발주항목과 조건별 회색 비활성화를 구현합니다.</li>
+  <li><b>HWPX 엔진</b>XML 이스케이프, 자리표시자 치환, 재압축과 다운로드를 완성합니다.</li>
+  <li><b>템플릿·인수</b>공사부터 용역·구매로 확장하고 한글에서 결과를 확인합니다.</li>
+</ol>
+
+<h2 id="criteria">판단 기준</h2>
+<table class="def">
+  <tr><th>동작</th><td>업로드한 파일에서 계산한 값을 쓴다</td></tr>
+  <tr><th>일부 동작</th><td>실행되지만 일부 경로가 고정값이거나 미구현이다</td></tr>
+  <tr><th>동작 안함</th><td>고정 문구이거나 기능 자체가 없다</td></tr>
+</table>
+
+<footer>
+같은 폴더 파일 · <a href="요약-되는것-안되는것.txt">요약-되는것-안되는것.txt</a> · <a href="개선-체크리스트.txt">개선-체크리스트.txt</a> · <a href="요약-되는것-안되는것.png">요약 PNG</a> · <a href="기능-동작상태-다이어그램-가로.png">가로 다이어그램 PNG</a> · <a href="기능-동작상태-다이어그램.png">세로 다이어그램 PNG</a>
+</footer>
+
+</div>
+<script>
+(function(){
+  var KEY='cost-validator-checklist-v1';
+  var boxes=[].slice.call(document.querySelectorAll('.item input'));
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){saved={}}
+  function paint(){
+    boxes.forEach(function(b){
+      b.parentNode.classList.toggle('done',b.checked);
+    });
+    ['validation','notice'].forEach(function(track){
+      var scoped=[].slice.call(document.querySelectorAll('.check-track[data-track="'+track+'"] .item input'));
+      var done=scoped.filter(function(b){return b.checked}).length;
+      var out=document.getElementById(track+'-done');
+      var bar=document.getElementById(track+'-bar');
+      if(out)out.textContent=done;
+      if(bar)bar.style.width=(scoped.length ? done/scoped.length*100 : 0)+'%';
+    });
+    [].slice.call(document.querySelectorAll('.check-group')).forEach(function(group){
+      var scoped=[].slice.call(group.querySelectorAll('.item input'));
+      var done=scoped.filter(function(b){return b.checked}).length;
+      var out=group.querySelector('[data-group-done]');
+      if(out)out.textContent=done;
+    });
+  }
+  boxes.forEach(function(b,i){
+    b.checked=!!saved[i];
+    b.addEventListener('change',function(){
+      saved[i]=b.checked;
+      try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}
+      paint();
+    });
+  });
+  paint();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "cost-validator-frontend-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --noEmit && vite build --configLoader native && vite preview --configLoader native --host 127.0.0.1 --port 4173",
+    "build": "tsc --noEmit && vite build --configLoader native",
+    "test": "tsc --noEmit",
+    "preview": "vite preview --configLoader native --host 127.0.0.1 --port 4173"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "xlsx": "0.18.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "playwright": "^1.61.1"
+  }
+}
