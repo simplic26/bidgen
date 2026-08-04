@@ -185,7 +185,7 @@ export function RatePanel({ rateFileMeta, onRateResult }: RatePanelProps) {
                     {previewRows.map((row, i) => (
                       <tr key={i}>
                         {result.columns.map((c) => {
-                          const v = (row as Record<string, unknown>)[c];
+                          const v = (row as unknown as Record<string, unknown>)[c];
                           return <td key={c}>{v == null ? '' : String(v)}</td>;
                         })}
                       </tr>
