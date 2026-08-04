@@ -1288,3 +1288,172 @@ blockquote {
 .derived-reset:hover {
   background: #fdf3d7;
 }
+
+/* ── 제비율 기준 (조달청 자동수집) 패널 ───────────────────────────── */
+.rate-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.rate-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.rate-field {
+  display: grid;
+  gap: 4px;
+}
+
+.rate-field span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #617080;
+}
+
+.rate-field input {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #cbd6df;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #17202a;
+  background: #fff;
+}
+
+.rate-field input[type='number'] {
+  width: 96px;
+}
+
+.rate-seg {
+  display: inline-flex;
+  border: 1px solid #cbd6df;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.rate-seg button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: none;
+  background: #fff;
+  font-weight: 700;
+  color: #46586a;
+  cursor: pointer;
+}
+
+.rate-seg button + button {
+  border-left: 1px solid #cbd6df;
+}
+
+.rate-seg button.is-active {
+  background: #1d5f8f;
+  color: #fff;
+}
+
+.rate-hint {
+  margin: 0;
+  color: #617080;
+  font-size: 13px;
+}
+
+.rate-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 7px;
+  background: #fdecec;
+  color: #b3261e;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #f4c7c3;
+  white-space: pre-wrap;
+}
+
+.rate-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.rate-meta {
+  margin: 0;
+}
+
+.rate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.rate-loglink {
+  border: none;
+  background: none;
+  color: #1d5f8f;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 6px 4px;
+}
+
+.rate-log {
+  margin: 0;
+  max-height: 200px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 7px;
+  background: #0f1626;
+  color: #c9d6ee;
+  font-family: Consolas, "SFMono-Regular", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.rate-preview {
+  display: grid;
+  gap: 8px;
+}
+
+.rate-preview-head {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #617080;
+}
+
+.rate-table-scroll {
+  max-height: 460px;
+  overflow: auto;
+  border: 1px solid #d8e0e7;
+  border-radius: 8px;
+}
+
+.rate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.rate-table th,
+.rate-table td {
+  border: 1px solid #e5ebf0;
+  padding: 6px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.rate-table th {
+  position: sticky;
+  top: 0;
+  background: #eef4fb;
+  color: #1d5f8f;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.rate-table tbody tr:nth-child(even) {
+  background: #f7fafc;
+}

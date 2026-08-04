@@ -130,6 +130,15 @@ export function RotateCcw(props: IconProps) {
   );
 }
 
+export function Download(props: IconProps) {
+  return (
+    <SvgIcon {...props}>
+      <path d="M12 3v12M7 10l5 5 5-5" />
+      <path d="M5 21h14" />
+    </SvgIcon>
+  );
+}
+
 export function CheckSquare(props: IconProps) {
   return (
     <SvgIcon {...props}>
