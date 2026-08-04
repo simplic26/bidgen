@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, FileSearch, FileText, TriangleAlert } from '../components/icons';
+import { CostTreeView } from '../components/CostTreeView';
 import type {
   FileMeta,
   LaborRate,
@@ -11,6 +12,7 @@ import type {
   ValidationMode,
   WorkbookIR,
 } from '../types';
+import type { CostTree } from '../utils/costTree';
 import { Button, Panel } from '../components/ui';
 import { countReferenceFiles } from '../utils/results';
 import { downloadJson } from '../utils/download';
@@ -20,6 +22,7 @@ interface RecognitionScreenProps {
   referenceFiles: ReferenceFiles;
   summary: RecognitionSummary;
   workbookIR: WorkbookIR | null;
+  costTree: CostTree | null;
   mode: ValidationMode;
   onModeChange: (mode: ValidationMode) => void;
   referenceRows: ReferenceRate[];
@@ -41,6 +44,7 @@ export function RecognitionScreen({
   referenceFiles,
   summary,
   workbookIR,
+  costTree,
   mode,
   onModeChange,
   referenceRows,
@@ -110,6 +114,8 @@ export function RecognitionScreen({
             <p>{excelFile?.name ?? '원가계산서'} · 기준자료 {countReferenceFiles(referenceFiles) || 3}개</p>
           </div>
         </header>
+
+        {costTree && <CostTreeView tree={costTree} />}
 
         <Panel>
           <div className="section-heading">

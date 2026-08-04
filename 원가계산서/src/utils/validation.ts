@@ -13,6 +13,9 @@ import type {
   ValidationType,
   WorkbookIR,
 } from '../types';
+import { CANONICAL_ITEMS, matchCanonical, normalizeLabel, parseKoreanNumber, parseRate } from './costItems';
+import { TREE_ITEM_MIN, costTreeToDetectedItems, parseCostTree } from './costTree';
+export { matchCanonicalLabel, normalizeLabel, parseKoreanNumber, parseRate } from './costItems';
 
 // ---------------------------------------------------------------------------
 // A1 좌표 헬퍼 (xlsx 비의존 → node 타입스트립 테스트 가능)
@@ -41,87 +44,7 @@ function decodeCell(addr: string): { c: number; r: number } {
   return { c: decodeCol(m[1]), r: parseInt(m[2], 10) - 1 };
 }
 
-// ---------------------------------------------------------------------------
-// 숫자·요율 파싱
-// ---------------------------------------------------------------------------
 
-export function parseKoreanNumber(raw: string | number | boolean | null): number | null {
-  if (raw == null || raw === '') return null;
-  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
-  if (typeof raw === 'boolean') return null;
-  let s = String(raw).trim().replace(/[,\s원]/g, '');
-  let negative = false;
-  if (/^\(.*\)$/.test(s)) {
-    negative = true;
-    s = s.slice(1, -1);
-  }
-  if (s.endsWith('%')) s = s.slice(0, -1);
-  const n = Number(s);
-  if (!Number.isFinite(n)) return null;
-  return negative ? -n : n;
-}
-
-export function parseRate(raw: string | number | boolean | null, numberFormat: string | null): number | null {
-  const n = parseKoreanNumber(raw);
-  if (n == null) return null;
-  if (numberFormat && numberFormat.includes('%')) return n; // SheetJS는 %서식 값을 분수로 저장
-  if (typeof raw === 'string' && raw.includes('%')) return n / 100;
-  if (n > 1) return n / 100; // 3.2 → 0.032
-  return n; // 이미 분수
-}
-
-export function normalizeLabel(s: string): string {
-  return s.replace(/\s+/g, '').toLowerCase();
-}
-
-// ---------------------------------------------------------------------------
-// 표준 원가항목 사전
-// ---------------------------------------------------------------------------
-
-interface CanonicalDef {
-  canonical: string;
-  category: string;
-  aliases: string[]; // 정규화된 형태
-  requiresReference: boolean;
-  defaultRate?: number;
-}
-
-const CANONICAL_ITEMS: CanonicalDef[] = [
-  { canonical: '산재보험료', category: '제보험료', aliases: ['산업재해보상보험료', '산재보험료', '산재보험'], requiresReference: true },
-  { canonical: '고용보험료', category: '제보험료', aliases: ['고용보험료', '고용보험'], requiresReference: true },
-  { canonical: '국민건강보험료', category: '제보험료', aliases: ['국민건강보험료', '건강보험료'], requiresReference: true },
-  { canonical: '노인장기요양보험료', category: '제보험료', aliases: ['노인장기요양보험료', '장기요양보험료'], requiresReference: true },
-  // 아래 2개는 공고문 자동 채움용 탐지 목적 — 기준요율 검증 대상은 아니라 requiresReference: false (NEEDS_REVIEW 노이즈 방지)
-  { canonical: '국민연금보험료', category: '제보험료', aliases: ['국민연금보험료', '연금보험료', '국민연금'], requiresReference: false },
-  { canonical: '퇴직공제부금비', category: '제경비', aliases: ['퇴직공제부금비', '퇴직공제부금', '건설근로자퇴직공제부금'], requiresReference: false },
-  { canonical: '산업안전보건관리비', category: '제경비', aliases: ['산업안전보건관리비', '안전보건관리비'], requiresReference: true },
-  { canonical: '간접노무비', category: '노무비', aliases: ['간접노무비'], requiresReference: true },
-  { canonical: '기타경비', category: '제경비', aliases: ['기타경비'], requiresReference: true },
-  { canonical: '일반관리비', category: '일반관리비', aliases: ['일반관리비'], requiresReference: true },
-  { canonical: '이윤', category: '이윤', aliases: ['이윤'], requiresReference: true },
-  { canonical: '환경보전비', category: '제경비', aliases: ['환경보전비'], requiresReference: true },
-  { canonical: '안전관리비', category: '제경비', aliases: ['안전관리비'], requiresReference: true },
-  { canonical: '부가가치세', category: '부가세', aliases: ['부가가치세', '부가세', 'vat'], requiresReference: false, defaultRate: 0.1 },
-];
-
-// 긴 별칭 우선 매칭 (부분포함 오탐 최소화)
-const ALIAS_INDEX: Array<{ alias: string; def: CanonicalDef }> = CANONICAL_ITEMS.flatMap((def) =>
-  def.aliases.map((alias) => ({ alias, def })),
-).sort((a, b) => b.alias.length - a.alias.length);
-
-function matchCanonical(label: string): CanonicalDef | null {
-  const norm = normalizeLabel(label);
-  if (!norm) return null;
-  for (const { alias, def } of ALIAS_INDEX) {
-    if (norm.includes(alias)) return def;
-  }
-  return null;
-}
-
-/** 라벨을 표준 원가항목명으로 매핑합니다. 매칭 실패 시 null. (기준자료 파서에서 재사용) */
-export function matchCanonicalLabel(label: string): string | null {
-  return matchCanonical(label)?.canonical ?? null;
-}
 
 // ---------------------------------------------------------------------------
 // 워크북 컨텍스트
@@ -419,7 +342,7 @@ export function evaluateFormula(
 // 항목 탐지
 // ---------------------------------------------------------------------------
 
-export function detectItems(ir: WorkbookIR, opts?: { maxCells?: number }): DetectedItem[] {
+function detectItemsLegacy(ir: WorkbookIR, opts?: { maxCells?: number }): DetectedItem[] {
   const maxCells = opts?.maxCells ?? 200000;
   const items: DetectedItem[] = [];
   const seen = new Set<string>();
@@ -485,6 +408,13 @@ export function detectItems(ir: WorkbookIR, opts?: { maxCells?: number }): Detec
     }
   }
   return items;
+}
+
+/** 항목 탐지: 트리 파서 우선, 요약시트 미발견 등으로 TREE_ITEM_MIN 미만이면 레거시 스캔 폴백 */
+export function detectItems(ir: WorkbookIR, opts?: { maxCells?: number }): DetectedItem[] {
+  const items = costTreeToDetectedItems(parseCostTree(ir));
+  if (items.length >= TREE_ITEM_MIN) return items;
+  return detectItemsLegacy(ir, opts);
 }
 
 export function buildReferenceRows(ir: WorkbookIR): ReferenceRate[] {

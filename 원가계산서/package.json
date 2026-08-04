@@ -7,7 +7,8 @@
     "dev": "tsc --noEmit && vite build --configLoader native && vite preview --configLoader native --host 127.0.0.1 --port 4173",
     "build": "tsc --noEmit && vite build --configLoader native",
     "test": "tsc --noEmit",
-    "preview": "vite preview --configLoader native --host 127.0.0.1 --port 4173"
+    "preview": "vite preview --configLoader native --host 127.0.0.1 --port 4173",
+    "golden": "node scripts/golden-test.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",
