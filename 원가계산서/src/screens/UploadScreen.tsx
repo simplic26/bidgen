@@ -1,8 +1,9 @@
 import { FileSpreadsheet, FileText, Play, ShieldCheck } from '../components/icons';
 import type { FileMeta, LaborRate, ProcurementType, RateCriterion, ReferenceFiles } from '../types';
 import { Button, Panel, UploadPanel } from '../components/ui';
+import { RatePanel } from '../components/RatePanel';
 import { buildWorkbookIR } from '../utils/excel';
-import { parseLaborWorkbook, parseRateWorkbook } from '../utils/criteria';
+import { parseLaborWorkbook } from '../utils/criteria';
 import type { WorkbookIR } from '../types';
 
 const procurementOptions: Array<{ value: ProcurementType; label: string; description: string }> = [
@@ -90,6 +91,8 @@ export function UploadScreen({
           </div>
         </Panel>
 
+        <RatePanel rateFileMeta={referenceFiles.rateFile} onRateResult={onRateExcel} />
+
         <div className="upload-grid">
           <Panel>
             <UploadPanel
@@ -113,37 +116,6 @@ export function UploadScreen({
                 excelFile ? (
                   <span>
                     <FileSpreadsheet size={16} /> {excelFile.name} · {excelFile.detail}
-                  </span>
-                ) : null
-              }
-            />
-          </Panel>
-
-          <Panel>
-            <UploadPanel
-              accept=".xlsx,.xls"
-              action="제비율 Excel 선택"
-              description="제비율 적용기준 Excel(.xlsx)을 등록하세요. 요율·산출기초 근거로 사용됩니다."
-              label="제비율 Excel 선택"
-              onChange={async (event) => {
-                const file = event.currentTarget.files?.[0];
-                if (!file) return;
-                try {
-                  const { criteria } = await parseRateWorkbook(file, procurementType);
-                  onRateExcel(fileToMeta(file, `제비율 ${criteria.length}개 추출 · 셀 근거 포함`), criteria);
-                } catch {
-                  onRateExcel(fileToMeta(file, '요율 추출 실패 · 수기 입력 필요'), []);
-                }
-              }}
-              title={
-                <>
-                  제비율 기준 Excel <em className="req-tag">필수</em>
-                </>
-              }
-              meta={
-                referenceFiles.rateFile ? (
-                  <span>
-                    <FileSpreadsheet size={16} /> {referenceFiles.rateFile.name} · {referenceFiles.rateFile.detail}
                   </span>
                 ) : null
               }
